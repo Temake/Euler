@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String          @id @default(uuid())
+  username    String          @unique
+  pinHash     String
+  track       String
+  role        String          @default("STUDENT")
+  createdAt   DateTime        @default(now())
+  sessions    DeviceSession[]
+  attempts    QuizAttempt[]
+  userAnswers UserAnswer[]
+  bookmarks   Bookmark[]
+}
+
+model DeviceSession {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceUuid   String
+  sessionToken String   @unique
+  lastActive   DateTime @default(now())
+  isActive     Boolean  @default(true)
+}
+
+model TrackWeek {
+  id         String    @id @default(uuid())
+  track      String
+  weekNumber Int
+  title      String
+  isUnlocked Boolean   @default(false)
+  unlockedAt DateTime?
+
+  @@unique([track, weekNumber])
+}
+
+model Question {
+  id           String           @id @default(uuid())
+  track        String
+  weekNumber   Int
+  domain       String
+  topic        String
+  stage        String           @default("PRELIMINARY")
+  questionType String
+  questionText String
+  explanation  String
+  createdAt    DateTime         @default(now())
+  options      QuestionOption[]
+  answers      UserAnswer[]
+  bookmarks    Bookmark[]
+}
+
+model QuestionOption {
+  id         String   @id @default(uuid())
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  optionKey  String
+  optionText String
+  isCorrect  Boolean
+}
+
+model QuizAttempt {
+  id                   String       @id @default(uuid())
+  userId               String
+  user                 User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track                String
+  weekNumber           Int
+  attemptType          String
+  score                Int
+  totalPossibleScore   Int
+  timeTakenSeconds     Int
+  isOfficialSubmission Boolean      @default(true)
+  submittedAt          DateTime     @default(now())
+  userAnswers          UserAnswer[]
+}
+
+model UserAnswer {
+  id                 String       @id @default(uuid())
+  attemptId          String?
+  attempt            QuizAttempt? @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  userId             String
+  user               User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId         String
+  question           Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedOptionKeys String[]
+  isCorrect          Boolean
+}
+
+model Bookmark {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, questionId])
+}
