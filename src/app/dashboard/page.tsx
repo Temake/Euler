@@ -147,11 +147,19 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/60 border border-slate-700/50 text-xs">
               <TrackIcon className={`w-4 h-4 ${trackBadge.accent}`} />
               <span className="font-semibold text-slate-200">{trackBadge.name}</span>
             </div>
+
+            <Link
+              href="/leaderboard"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-bold transition-colors shadow-sm"
+            >
+              <Trophy className="w-3.5 h-3.5" />
+              <span>Leaderboard</span>
+            </Link>
 
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-slate-300">

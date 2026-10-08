@@ -33,34 +33,90 @@ const TRACK_WEEKS = [
 
 async function seedTrackQuestions(track: string, questions: RawQuestion[]) {
   console.log(`Seeding ${questions.length} questions for track: ${track}...`);
-  for (const q of questions) {
-    const createdQuestion = await prisma.question.create({
-      data: {
-        track,
-        weekNumber: q.weekNumber,
-        domain: q.domain,
-        topic: q.topic,
-        stage: q.stage,
-        questionType: q.questionType,
-        questionText: q.questionText,
-        explanation: q.explanation,
-        options: {
-          create: q.options.map((opt) => ({
-            optionKey: opt.key,
-            optionText: opt.text,
-            isCorrect: opt.isCorrect,
-          })),
-        },
-      },
+  const CHUNK_SIZE = 15;
+  for (let i = 0; i < questions.length; i += CHUNK_SIZE) {
+    const chunk = questions.slice(i, i + CHUNK_SIZE);
+    await Promise.all(
+      chunk.map((q) =>
+        prisma.question.create({
+          data: {
+            track,
+            weekNumber: q.weekNumber,
+            domain: q.domain,
+            topic: q.topic,
+            stage: q.stage || 'WEEKLY',
+            questionType: q.questionType,
+            questionText: q.questionText,
+            explanation: q.explanation,
+            options: {
+              create: q.options.map((opt) => ({
+                optionKey: opt.key,
+                optionText: opt.text,
+                isCorrect: opt.isCorrect,
+              })),
+            },
+          },
+        })
+      )
+    );
+  }
+}
+
+interface MockSelectionRule {
+  week: number;
+  count: number;
+}
+
+async function populateWeek6MockExam(track: string, selectionRules: MockSelectionRule[]) {
+  console.log(`Configuring Week 6 Preliminary Mock Exam for track: ${track}...`);
+  const selectedQuestions: any[] = [];
+
+  for (const rule of selectionRules) {
+    const pool = await prisma.question.findMany({
+      where: { track, weekNumber: rule.week },
+      include: { options: true },
+      take: rule.count,
+      orderBy: { id: 'asc' },
     });
+    selectedQuestions.push(...pool);
+  }
+
+  console.log(`Selected ${selectedQuestions.length} questions for ${track} Week 6 Mock Exam.`);
+
+  const CHUNK_SIZE = 15;
+  for (let i = 0; i < selectedQuestions.length; i += CHUNK_SIZE) {
+    const chunk = selectedQuestions.slice(i, i + CHUNK_SIZE);
+    await Promise.all(
+      chunk.map((q) =>
+        prisma.question.create({
+          data: {
+            track: q.track,
+            weekNumber: 6,
+            domain: q.domain,
+            topic: q.topic,
+            stage: 'PRELIMINARY',
+            questionType: q.questionType,
+            questionText: q.questionText,
+            explanation: q.explanation,
+            options: {
+              create: q.options.map((opt: any) => ({
+                optionKey: opt.optionKey,
+                optionText: opt.optionText,
+                isCorrect: opt.isCorrect,
+              })),
+            },
+          },
+        })
+      )
+    );
   }
 }
 
 async function main() {
-  console.log('Starting Euler Database Seeder...');
+  console.log('=== Starting Euler Database Seeder ===');
 
   // 1. Seed Track Weeks
-  console.log('Syncing TrackWeek records...');
+  console.log('1. Syncing TrackWeek records...');
   for (const tw of TRACK_WEEKS) {
     await prisma.trackWeek.upsert({
       where: {
@@ -84,49 +140,62 @@ async function main() {
   }
   console.log(`Successfully synced ${TRACK_WEEKS.length} TrackWeek records.`);
 
-  // 2. Clear existing questions and seed fresh authentic question bank
-  console.log('Cleaning old questions and answers...');
+  // 2. Clear existing questions and answers
+  console.log('2. Cleaning previous questions and answers...');
   await prisma.userAnswer.deleteMany({});
   await prisma.bookmark.deleteMany({});
   await prisma.questionOption.deleteMany({});
   await prisma.question.deleteMany({});
 
-  // 3. Seed Questions for CLOUD, COMPUTING, NETWORK
+  // 3. Seed Questions for CLOUD, COMPUTING, NETWORK (Weeks 1-5: 150 questions per track)
+  console.log('3. Seeding Weekly Curriculum Questions (Weeks 1-5)...');
   await seedTrackQuestions('CLOUD', cloudQuestions);
   await seedTrackQuestions('COMPUTING', computingQuestions);
   await seedTrackQuestions('NETWORK', networkQuestions);
 
-  // 4. Duplicate relevant Week 1-5 questions to Week 6 Mock Exam pool
-  console.log('Populating Week 6 Preliminary Mock Exam pools...');
-  const allQuestions = await prisma.question.findMany({
-    where: { weekNumber: { in: [1, 2, 3, 4, 5] } },
-    include: { options: true }
-  });
+  // 4. Populate Week 6 Mock Exam Pools adhering strictly to official track weighting rules
+  console.log('4. Generating Week 6 Preliminary Mock Exam Pools...');
 
-  for (const q of allQuestions) {
-    await prisma.question.create({
-      data: {
-        track: q.track,
-        weekNumber: 6,
-        domain: q.domain,
-        topic: q.topic,
-        stage: 'PRELIMINARY',
-        questionType: q.questionType,
-        questionText: q.questionText,
-        explanation: q.explanation,
-        options: {
-          create: q.options.map(opt => ({
-            optionKey: opt.optionKey,
-            optionText: opt.optionText,
-            isCorrect: opt.isCorrect
-          }))
-        }
-      }
-    });
-  }
+  // Cloud: 60% Cloud Services (36 Qs) / 40% AI (24 Qs) = 60 Qs total
+  await populateWeek6MockExam('CLOUD', [
+    { week: 1, count: 12 }, // Cloud Compute (12 Qs)
+    { week: 2, count: 12 }, // Storage & Networking (12 Qs)
+    { week: 3, count: 12 }, // Databases & Cloud Native (12 Qs) -> 36 Qs Cloud (60%)
+    { week: 4, count: 12 }, // AI Foundations & Large Models (12 Qs)
+    { week: 5, count: 12 }, // ModelArts AI Platform (12 Qs) -> 24 Qs AI (40%)
+  ]);
 
+  // Computing: 50% openEuler (30 Qs) / 30% openGauss (18 Qs) / 20% Kunpeng (12 Qs) = 60 Qs total
+  await populateWeek6MockExam('COMPUTING', [
+    { week: 1, count: 15 }, // openEuler Basics (15 Qs)
+    { week: 2, count: 15 }, // openEuler System Mgmt & Optimization (15 Qs) -> 30 Qs openEuler (50%)
+    { week: 3, count: 9 },  // openGauss Deployment & Admin (9 Qs)
+    { week: 4, count: 9 },  // openGauss SQL & Security (9 Qs) -> 18 Qs openGauss (30%)
+    { week: 5, count: 12 }, // Kunpeng DevKit & BoostKit (12 Qs, 20%)
+  ]);
+
+  // Network: 40% Datacom (24 Qs) / 20% DCN (12 Qs) / 20% Security (12 Qs) / 20% WLAN (12 Qs) = 60 Qs total
+  await populateWeek6MockExam('NETWORK', [
+    { week: 1, count: 12 }, // Datacom Basics & L2 Switching (12 Qs)
+    { week: 2, count: 12 }, // Routing & IPv6 (12 Qs) -> 24 Qs Datacom (40%)
+    { week: 3, count: 12 }, // WAN, AAA & Network Security (12 Qs, 20%)
+    { week: 4, count: 12 }, // VPN & DCN Fundamentals (12 Qs, 20%)
+    { week: 5, count: 12 }, // WLAN Services & Planning (12 Qs, 20%)
+  ]);
+
+  // 5. Output summary metrics
   const totalQuestions = await prisma.question.count();
-  console.log(`Seeding complete! Total questions across all tracks: ${totalQuestions}`);
+  const cloudCount = await prisma.question.count({ where: { track: 'CLOUD' } });
+  const compCount = await prisma.question.count({ where: { track: 'COMPUTING' } });
+  const netCount = await prisma.question.count({ where: { track: 'NETWORK' } });
+  const mockCount = await prisma.question.count({ where: { weekNumber: 6 } });
+
+  console.log('\n=== Database Seeding Complete ===');
+  console.log(`Total questions across all tracks: ${totalQuestions}`);
+  console.log(`- Cloud Track: ${cloudCount} questions (150 weekly + 60 mock)`);
+  console.log(`- Computing Track: ${compCount} questions (150 weekly + 60 mock)`);
+  console.log(`- Network Track: ${netCount} questions (150 weekly + 60 mock)`);
+  console.log(`- Total Week 6 Preliminary Mock Exam questions: ${mockCount} (60 per track)`);
 }
 
 main()

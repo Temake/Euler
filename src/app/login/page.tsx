@@ -80,7 +80,16 @@ function LoginPageContent() {
   const searchParams = useSearchParams();
   const returnTo = searchParams.get("from") || "/dashboard";
 
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const initialMode = searchParams.get("mode") === "register" ? "register" : "login";
+  const [mode, setMode] = useState<"login" | "register">(initialMode);
+
+  useEffect(() => {
+    if (searchParams.get("mode") === "register") {
+      setMode("register");
+    } else if (searchParams.get("mode") === "login") {
+      setMode("login");
+    }
+  }, [searchParams]);
   const [username, setUsername] = useState("");
   const [pin, setPin] = useState("");
   const [showPin, setShowPin] = useState(false);

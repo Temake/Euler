@@ -69,8 +69,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 2. PUBLIC LOGIN ROUTE
-  if (pathname === "/login") {
+  // 2. PUBLIC LOGIN & REGISTER ROUTES
+  if (pathname === "/login" || pathname === "/register") {
     const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
     if (sessionCookie) {
       const session = await verifyToken(sessionCookie);
@@ -82,11 +82,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 3. PROTECTED CONTESTANT ROUTES (/dashboard, /arena, /practice)
+  // 3. PROTECTED CONTESTANT ROUTES (/dashboard, /arena, /practice, /leaderboard)
   const isContestantRoute =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/arena") ||
-    pathname.startsWith("/practice");
+    pathname.startsWith("/practice") ||
+    pathname.startsWith("/leaderboard");
 
   if (isContestantRoute) {
     const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
@@ -140,7 +141,9 @@ export const config = {
     "/dashboard/:path*",
     "/arena/:path*",
     "/practice/:path*",
+    "/leaderboard/:path*",
     "/admin/:path*",
     "/login",
+    "/register",
   ],
 };
