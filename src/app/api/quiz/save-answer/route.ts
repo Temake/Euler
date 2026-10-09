@@ -12,10 +12,21 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { attemptId, questionId, selectedOptionKeys } = body;
+    const { attemptId, questionId, selectedOptionKeys, selectedOptionIds } = body;
 
     if (!questionId || !Array.isArray(selectedOptionKeys)) {
       return NextResponse.json({ error: 'Invalid parameters' }, { status: 400 });
+    }
+
+    let dbKeysToSave = selectedOptionKeys;
+    if (Array.isArray(selectedOptionIds) && selectedOptionIds.length > 0) {
+      const dbOptions = await prisma.questionOption.findMany({
+        where: { questionId, id: { in: selectedOptionIds } },
+        select: { optionKey: true },
+      });
+      if (dbOptions.length > 0) {
+        dbKeysToSave = dbOptions.map((o) => o.optionKey).sort();
+      }
     }
 
     // Upsert the user answer linked to this attempt
@@ -31,7 +42,7 @@ export async function POST(req: NextRequest) {
       await prisma.userAnswer.update({
         where: { id: existingAnswer.id },
         data: {
-          selectedOptionKeys,
+          selectedOptionKeys: dbKeysToSave,
         },
       });
     } else {
@@ -40,7 +51,7 @@ export async function POST(req: NextRequest) {
           userId: user.userId,
           attemptId: attemptId || null,
           questionId,
-          selectedOptionKeys,
+          selectedOptionKeys: dbKeysToSave,
           isCorrect: false, // Calculated upon final submission
         },
       });

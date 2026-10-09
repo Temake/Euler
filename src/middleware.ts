@@ -82,12 +82,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 3. PROTECTED CONTESTANT ROUTES (/dashboard, /arena, /practice, /leaderboard)
+  // 3. PROTECTED CONTESTANT ROUTES (/dashboard, /arena, /practice, /leaderboard, /mistakes)
   const isContestantRoute =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/arena") ||
     pathname.startsWith("/practice") ||
-    pathname.startsWith("/leaderboard");
+    pathname.startsWith("/leaderboard") ||
+    pathname.startsWith("/mistakes");
 
   if (isContestantRoute) {
     const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
@@ -142,6 +143,7 @@ export const config = {
     "/arena/:path*",
     "/practice/:path*",
     "/leaderboard/:path*",
+    "/mistakes/:path*",
     "/admin/:path*",
     "/login",
     "/register",

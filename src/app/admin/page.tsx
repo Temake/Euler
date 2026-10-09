@@ -247,29 +247,30 @@ export default function AdminPage() {
     <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-rose-500 selection:text-white">
       {/* Header */}
       <header className="border-b border-rose-900/30 bg-slate-900/80 backdrop-blur-xl sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-600 to-red-700 flex items-center justify-center shadow-lg shadow-rose-950/60">
-              <ShieldAlert className="w-5 h-5 text-white" />
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-rose-600 to-red-700 flex items-center justify-center shadow-lg shadow-rose-950/60 shrink-0">
+              <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
-            <div>
-              <span className="font-extrabold text-lg text-white">Euler Admin Console</span>
+            <div className="min-w-0">
+              <span className="font-extrabold text-sm sm:text-lg text-white truncate">Euler Admin</span>
               <span className="hidden sm:inline-block ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
                 Exam Proctor Master
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Link
               href="/dashboard"
-              className="text-xs text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded-lg bg-slate-800/60 border border-slate-700/60 transition-colors"
+              className="text-xs text-slate-400 hover:text-slate-200 px-2.5 sm:px-3 py-1.5 rounded-lg bg-slate-800/60 border border-slate-700/60 transition-colors"
             >
-              View Student App
+              <span className="hidden sm:inline">View Student App</span>
+              <span className="sm:hidden">Student App</span>
             </Link>
             <button
               onClick={handleLogout}
-              className="p-2 rounded-lg bg-slate-800/60 hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 transition-colors border border-slate-700/60"
+              className="p-1.5 sm:p-2 rounded-lg bg-slate-800/60 hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 transition-colors border border-slate-700/60"
               title="Admin Logout"
             >
               <LogOut className="w-4 h-4" />
@@ -279,7 +280,7 @@ export default function AdminPage() {
       </header>
 
       {/* Main Admin Body */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
         {/* Global Statistics Overview */}
         {stats && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -334,7 +335,7 @@ export default function AdminPage() {
         )}
 
         {/* Section Navigation Tabs */}
-        <div className="flex border-b border-slate-800 gap-4">
+        <div className="flex border-b border-slate-800 gap-4 overflow-x-auto pb-1 scrollbar-none whitespace-nowrap">
           <button
             onClick={() => setActiveSection("CURRICULUM")}
             className={`pb-3 text-sm font-bold flex items-center gap-2 border-b-2 transition-all ${

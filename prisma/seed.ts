@@ -37,8 +37,15 @@ async function seedTrackQuestions(track: string, questions: RawQuestion[]) {
   for (let i = 0; i < questions.length; i += CHUNK_SIZE) {
     const chunk = questions.slice(i, i + CHUNK_SIZE);
     await Promise.all(
-      chunk.map((q) =>
-        prisma.question.create({
+      chunk.map((q) => {
+        const OPTION_KEYS = ['A', 'B', 'C', 'D', 'E', 'F'];
+        const shuffledOptions = [...q.options];
+        for (let i = shuffledOptions.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+        }
+
+        return prisma.question.create({
           data: {
             track,
             weekNumber: q.weekNumber,
@@ -49,15 +56,15 @@ async function seedTrackQuestions(track: string, questions: RawQuestion[]) {
             questionText: q.questionText,
             explanation: q.explanation,
             options: {
-              create: q.options.map((opt) => ({
-                optionKey: opt.key,
+              create: shuffledOptions.map((opt, idx) => ({
+                optionKey: OPTION_KEYS[idx] || String.fromCharCode(65 + idx),
                 optionText: opt.text,
                 isCorrect: opt.isCorrect,
               })),
             },
           },
-        })
-      )
+        });
+      })
     );
   }
 }

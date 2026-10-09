@@ -23,14 +23,16 @@ export async function GET(req: NextRequest) {
     const isSeason = weekParam === 'season' || !weekParam;
     const weekNumber = parseInt(weekParam || '1', 10);
 
+    const currentUserId = user?.userId;
+
     if (isSeason) {
-      // Cumulative Season Standings: sum of highest scores across weeks
+      // Cumulative Season Standings: sum of official scores across all rounds (Weekly Arena + Mock Exam)
       const users = await prisma.user.findMany({
         where: { track: targetTrack },
         include: {
           attempts: {
             where: {
-              attemptType: 'WEEKLY_ARENA',
+              attemptType: { in: ['WEEKLY_ARENA', 'MOCK_EXAM'] },
               isOfficialSubmission: true,
               score: { gte: 0 },
             },
@@ -43,14 +45,17 @@ export async function GET(req: NextRequest) {
           const totalScore = u.attempts.reduce((sum, a) => sum + a.score, 0);
           const totalTime = u.attempts.reduce((sum, a) => sum + a.timeTakenSeconds, 0);
           const completedWeeks = u.attempts.length;
+          const bestScore = u.attempts.length > 0 ? Math.max(...u.attempts.map((a) => a.score)) : 0;
 
           return {
             userId: u.id,
             username: u.username,
             track: u.track,
             totalScore,
+            bestScore,
             totalTimeSeconds: totalTime,
             completedWeeks,
+            isCurrentUser: u.id === currentUserId,
           };
         })
         .filter((s) => s.completedWeeks > 0)
@@ -65,20 +70,25 @@ export async function GET(req: NextRequest) {
           ...entry,
         }));
 
+      const myStanding = standings.find((s) => s.isCurrentUser);
+
       return NextResponse.json({
         success: true,
         type: 'SEASON_CUMULATIVE',
         track: targetTrack,
+        totalContestants: standings.length,
+        myRank: myStanding ? myStanding.rank : null,
+        myScore: myStanding ? myStanding.totalScore : null,
         standings,
       });
     }
 
-    // Single Week Standings
+    // Single Week Standings (supports Week 1-5 Arena and Week 6 Mock Exam)
     const attempts = await prisma.quizAttempt.findMany({
       where: {
         track: targetTrack,
         weekNumber,
-        attemptType: 'WEEKLY_ARENA',
+        attemptType: { in: ['WEEKLY_ARENA', 'MOCK_EXAM'] },
         isOfficialSubmission: true,
         score: { gte: 0 },
       },
@@ -91,7 +101,7 @@ export async function GET(req: NextRequest) {
       },
       orderBy: [
         { score: 'desc' },
-        { timeTakenSeconds: 'asc' }, // Tie breaker
+        { timeTakenSeconds: 'asc' }, // Tie breaker: fastest completion
         { submittedAt: 'asc' },
       ],
     });
@@ -105,13 +115,19 @@ export async function GET(req: NextRequest) {
       score: att.score,
       timeTakenSeconds: att.timeTakenSeconds,
       submittedAt: att.submittedAt,
+      isCurrentUser: att.userId === currentUserId,
     }));
+
+    const myStanding = standings.find((s) => s.isCurrentUser);
 
     return NextResponse.json({
       success: true,
       type: 'WEEKLY',
       track: targetTrack,
       weekNumber,
+      totalParticipants: standings.length,
+      myRank: myStanding ? myStanding.rank : null,
+      myScore: myStanding ? myStanding.score : null,
       standings,
     });
   } catch (error) {

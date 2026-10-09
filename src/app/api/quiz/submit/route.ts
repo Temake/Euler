@@ -27,6 +27,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Attempt not found or unauthorized' }, { status: 404 });
     }
 
+    // 1. Guard against duplicate submission of already scored attempt
+    if (attempt.score !== -1) {
+      return NextResponse.json(
+        { error: 'This exam attempt has already been submitted and finalized.' },
+        { status: 400 }
+      );
+    }
+
+    // 2. Authoritative server elapsed time calculation (anti-cheating & leaderboard integrity)
+    const startTime = new Date(attempt.submittedAt).getTime();
+    const nowTime = Date.now();
+    const serverElapsedSeconds = Math.max(1, Math.floor((nowTime - startTime) / 1000));
+    const maxAllowedSeconds = weekNumber === 6 ? 60 * 60 : 30 * 60;
+    const GRACE_PERIOD_SECONDS = 90; // network latency buffer
+
+    // Prevent client from spoofing artificially low completion times
+    let validatedTime = serverElapsedSeconds;
+    if (typeof timeTakenSeconds === 'number' && timeTakenSeconds > 0) {
+      // Only accept client time if it is within a reasonable tolerance of server measurement
+      if (Math.abs(serverElapsedSeconds - timeTakenSeconds) <= 15) {
+        validatedTime = timeTakenSeconds;
+      }
+    }
+    // Cap completion time to the maximum allowed quiz duration
+    validatedTime = Math.min(validatedTime, maxAllowedSeconds);
+
     // Retrieve the questions and correct options from the database
     const questionIds = answers.map((a: any) => a.questionId);
     const questions = await prisma.question.findMany({
@@ -39,27 +65,55 @@ export async function POST(req: NextRequest) {
 
     for (const q of questions) {
       const userAnswer = answers.find((a: any) => a.questionId === q.id);
+      const selectedOptionIds = userAnswer?.selectedOptionIds || [];
       const selectedKeys = (userAnswer?.selectedOptionKeys || []).sort();
 
-      const correctKeys = q.options
-        .filter((opt) => opt.isCorrect)
-        .map((opt) => opt.optionKey)
-        .sort();
+      const correctOptions = q.options.filter((opt) => opt.isCorrect);
+      const correctOptionIds = correctOptions.map((opt) => opt.id).sort();
+      const correctDbKeys = correctOptions.map((opt) => opt.optionKey).sort();
 
-      // Check all-or-nothing match
-      const isCorrect =
-        selectedKeys.length === correctKeys.length &&
-        selectedKeys.every((key: string, idx: number) => key === correctKeys[idx]);
+      // Check all-or-nothing match:
+      // Prefer matching by option UUIDs for 100% resilient grading regardless of client shuffle
+      let isCorrect = false;
+      if (Array.isArray(selectedOptionIds) && selectedOptionIds.length > 0) {
+        const sortedSelectedIds = [...selectedOptionIds].sort();
+        isCorrect =
+          sortedSelectedIds.length === correctOptionIds.length &&
+          sortedSelectedIds.every((id: string, idx: number) => id === correctOptionIds[idx]);
+      } else {
+        isCorrect =
+          selectedKeys.length === correctDbKeys.length &&
+          selectedKeys.every((key: string, idx: number) => key === correctDbKeys[idx]);
+      }
 
       if (isCorrect) {
         correctCount++;
       }
 
+      // Convert selectedOptionIds to DB option keys for database storage consistency
+      let dbStoredSelectedKeys = selectedKeys;
+      if (Array.isArray(selectedOptionIds) && selectedOptionIds.length > 0) {
+        dbStoredSelectedKeys = q.options
+          .filter((opt) => selectedOptionIds.includes(opt.id))
+          .map((opt) => opt.optionKey)
+          .sort();
+      }
+
       gradedResults.push({
         questionId: q.id,
+        questionText: q.questionText,
+        questionType: q.questionType,
+        domain: q.domain,
+        topic: q.topic,
+        options: q.options.map((opt) => ({
+          id: opt.id,
+          optionKey: opt.optionKey,
+          optionText: opt.optionText,
+          isCorrect: opt.isCorrect,
+        })),
         isCorrect,
-        correctKeys,
-        selectedKeys,
+        correctKeys: correctDbKeys,
+        selectedKeys: dbStoredSelectedKeys,
         explanation: q.explanation,
       });
 
@@ -72,7 +126,7 @@ export async function POST(req: NextRequest) {
         await prisma.userAnswer.update({
           where: { id: existing.id },
           data: {
-            selectedOptionKeys: selectedKeys,
+            selectedOptionKeys: dbStoredSelectedKeys,
             isCorrect,
           },
         });
@@ -82,7 +136,7 @@ export async function POST(req: NextRequest) {
             userId: user.userId,
             attemptId,
             questionId: q.id,
-            selectedOptionKeys: selectedKeys,
+            selectedOptionKeys: dbStoredSelectedKeys,
             isCorrect,
           },
         });
@@ -91,9 +145,8 @@ export async function POST(req: NextRequest) {
 
     const totalQuestions = questions.length || 1;
     const finalScore = Math.round((correctCount / totalQuestions) * 1000);
-    const validatedTime = Math.max(1, timeTakenSeconds || 60);
 
-    // Update the attempt with final score and time taken
+    // Update the attempt with final score and authoritative time taken
     const updatedAttempt = await prisma.quizAttempt.update({
       where: { id: attemptId },
       data: {

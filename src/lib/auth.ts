@@ -121,12 +121,24 @@ export async function verifyAdminToken(
   }
 }
 
+import crypto from "crypto";
+import { prisma } from "@/lib/prisma";
+
 /**
- * Verifies the admin master PIN against environment variable ADMIN_PIN
+ * Verifies the admin master PIN using timing-safe comparison to prevent side-channel timing attacks
  */
 export function verifyAdminPin(pin: string): boolean {
-  const masterPin = process.env.ADMIN_PIN || "888999";
-  return pin.trim() === masterPin.trim();
+  const masterPin = (process.env.ADMIN_PIN || "888999").trim();
+  const inputPin = pin.trim();
+
+  const pinBuffer = Buffer.from(inputPin);
+  const masterBuffer = Buffer.from(masterPin);
+
+  if (pinBuffer.length !== masterBuffer.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(pinBuffer, masterBuffer);
 }
 
 /**
@@ -164,12 +176,32 @@ export function clearAdminCookie(response: NextResponse): void {
 }
 
 /**
- * Extracts and verifies the contestant session from a NextRequest
+ * Extracts and verifies the contestant session from a NextRequest,
+ * validating both the cryptographic JWT signature AND ensuring the device session
+ * remains active in PostgreSQL (enforcing single active device handover).
  */
 export async function getSessionUser(req: any): Promise<SessionPayload | null> {
   const token = req.cookies.get(SESSION_COOKIE_NAME)?.value;
   if (!token) return null;
-  return verifySessionToken(token);
+
+  const payload = await verifySessionToken(token);
+  if (!payload) return null;
+
+  try {
+    const dbSession = await prisma.deviceSession.findUnique({
+      where: { sessionToken: token },
+      select: { isActive: true },
+    });
+
+    if (!dbSession || !dbSession.isActive) {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error validating active device session:", error);
+    return null;
+  }
+
+  return payload;
 }
 
 /**
@@ -180,4 +212,5 @@ export async function getAdminSession(req: any): Promise<AdminSessionPayload | n
   if (!token) return null;
   return verifyAdminToken(token);
 }
+
 

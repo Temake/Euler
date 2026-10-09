@@ -5,7 +5,11 @@
 
 /images
 
-.env 
+.env
+.env.local
+s
+env
+
 
 # testing
 /coverage
