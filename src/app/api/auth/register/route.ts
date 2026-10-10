@@ -5,6 +5,8 @@ import { hashPin, signSessionToken, setSessionCookie } from "@/lib/auth";
 const VALID_TRACKS = ["CLOUD", "COMPUTING", "NETWORK"] as const;
 type ValidTrack = (typeof VALID_TRACKS)[number];
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

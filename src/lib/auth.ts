@@ -122,7 +122,6 @@ export async function verifyAdminToken(
 }
 
 import crypto from "crypto";
-import { prisma } from "@/lib/prisma";
 
 /**
  * Verifies the admin master PIN using timing-safe comparison to prevent side-channel timing attacks
@@ -188,6 +187,7 @@ export async function getSessionUser(req: any): Promise<SessionPayload | null> {
   if (!payload) return null;
 
   try {
+    const { prisma } = await import("@/lib/prisma");
     const dbSession = await prisma.deviceSession.findUnique({
       where: { sessionToken: token },
       select: { isActive: true },
