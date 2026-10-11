@@ -12,22 +12,17 @@ import {
   Trophy,
   ArrowRight,
   ArrowLeft,
-  ShieldAlert,
   Send,
-  Zap,
-  RotateCcw,
   BookOpen,
   Star,
   BookMarked,
   Info,
   ChevronDown,
   ChevronUp,
-  Layers,
-  Crown,
-  Medal,
   X,
-  Sparkles,
+  Heart,
 } from "lucide-react";
+import { EulerSigma } from "@/components/EulerSigma";
 
 interface Option {
   id: string;
@@ -77,13 +72,10 @@ function ArenaPageContent() {
   const [error, setError] = useState<string | null>(null);
   const [alreadyCompletedNotice, setAlreadyCompletedNotice] = useState<any>(null);
 
-  // Anti-Cheating & Focus Detection (Phase 6)
+  // Anti-Cheating & Focus Detection
   const [tabSwitchCount, setTabSwitchCount] = useState<number>(0);
   const [blurWarning, setBlurWarning] = useState<string | null>(null);
   const [copyWarning, setCopyWarning] = useState<string | null>(null);
-
-  // Mobile Question Palette Drawer (Phase 6)
-  const [showMobilePalette, setShowMobilePalette] = useState(false);
 
   // Review & Bookmarks
   const [bookmarkedKeys, setBookmarkedKeys] = useState<Record<string, boolean>>({});
@@ -97,7 +89,6 @@ function ArenaPageContent() {
   useEffect(() => {
     async function initArena() {
       try {
-        // Start or resume attempt
         const startRes = await fetch("/api/quiz/start", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -124,7 +115,6 @@ function ArenaPageContent() {
         setAttemptId(startData.attemptId);
         setRemainingSeconds(startData.remainingSeconds);
 
-        // Preload saved answers if resuming from another device (Mobile -> PC handover)
         if (startData.savedAnswers && startData.savedAnswers.length > 0) {
           const preloaded: Record<string, string[]> = {};
           startData.savedAnswers.forEach((ans: any) => {
@@ -133,7 +123,6 @@ function ArenaPageContent() {
           setSelectedAnswers(preloaded);
         }
 
-        // Fetch questions (with option and question randomization per Phase 6)
         const qRes = await fetch(
           `/api/curriculum/questions?weekNumber=${weekNumber}&mode=ARENA&randomize=true`
         );
@@ -175,7 +164,7 @@ function ArenaPageContent() {
     };
   }, [loading, isCompleted, alreadyCompletedNotice]);
 
-  // 3. Proctor Anti-Cheating: Multi-Level Blur & Tab Switch Detection (Phase 6)
+  // 3. Anti-Cheating
   useEffect(() => {
     if (loading || isCompleted || alreadyCompletedNotice) return;
 
@@ -184,17 +173,11 @@ function ArenaPageContent() {
       setTabSwitchCount((prev) => {
         const count = prev + 1;
         if (count === 1) {
-          setBlurWarning(
-            "Tab switch / window focus loss detected! (Warning 1/3) In official Huawei ICT competitions, leaving the examination window is flagged on proctor audit logs."
-          );
+          setBlurWarning("Window focus loss detected! (Warning 1/3) Please remain in the examination tab.");
         } else if (count === 2) {
-          setBlurWarning(
-            "Multiple window focus departures recorded! (Warning 2/3) Continued focus departures may invalidate your official competition ranking."
-          );
+          setBlurWarning("Multiple window departures recorded! (Warning 2/3) Continued departures will be logged.");
         } else {
-          setBlurWarning(
-            `Critical Security Alert (${count} departures recorded)! Proctor audit telemetry will report excessive focus loss for this session.`
-          );
+          setBlurWarning(`Security Alert (${count} departures recorded)! Proctor audit telemetry will report excessive focus loss.`);
         }
         return count;
       });
@@ -208,32 +191,23 @@ function ArenaPageContent() {
       recordViolation();
     };
 
-    // Clipboard copy deterrence
     const handleCopy = (e: ClipboardEvent) => {
       e.preventDefault();
-      setCopyWarning("Copying question text is prohibited under Huawei ICT competition regulations.");
+      setCopyWarning("Copying question text is disabled during official rounds.");
       setTimeout(() => setCopyWarning(null), 3500);
-    };
-
-    // Context menu deterrence
-    const handleContextMenu = (e: MouseEvent) => {
-      e.preventDefault();
     };
 
     document.addEventListener("visibilitychange", handleVisibility);
     window.addEventListener("blur", handleWindowBlur);
     document.addEventListener("copy", handleCopy);
-    document.addEventListener("contextmenu", handleContextMenu);
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("blur", handleWindowBlur);
       document.removeEventListener("copy", handleCopy);
-      document.removeEventListener("contextmenu", handleContextMenu);
     };
   }, [loading, isCompleted, alreadyCompletedNotice]);
 
-  // 4. Toggle Option Selection & Real-Time Background Auto-Save
   const handleSelectOption = async (optionKey: string, optionId?: string) => {
     const currentQ = questions[currentIndex];
     if (!currentQ || isSubmitting || isCompleted) return;
@@ -253,7 +227,6 @@ function ArenaPageContent() {
         if (optionId) updatedIds = [...existingIds, optionId];
       }
     } else {
-      // Single choice or True/False
       updatedKeys = [optionKey];
       if (optionId) updatedIds = [optionId];
     }
@@ -270,7 +243,6 @@ function ArenaPageContent() {
       }));
     }
 
-    // Real-Time Background Auto-Save to PostgreSQL for zero data loss
     try {
       await fetch("/api/quiz/save-answer", {
         method: "POST",
@@ -283,11 +255,10 @@ function ArenaPageContent() {
         }),
       });
     } catch (e) {
-      console.warn("Background auto-save ping failed", e);
+      console.warn("Background auto-save failed", e);
     }
   };
 
-  // 5. Final Submission & Multi-Tier Confetti Celebration (Phase 6)
   const handleAutoSubmit = () => {
     handleSubmitQuiz();
   };
@@ -323,14 +294,11 @@ function ArenaPageContent() {
         setSubmissionResult(data);
         setIsCompleted(true);
 
-        // Phase 6 Multi-Tier Confetti Celebration
         if (data.score >= 900) {
-          // Distinction Tier: Multi-stage fireworks cascade
           confetti({ particleCount: 90, spread: 60, origin: { x: 0.2, y: 0.6 } });
           setTimeout(() => confetti({ particleCount: 110, spread: 80, origin: { x: 0.8, y: 0.6 } }), 250);
           setTimeout(() => confetti({ particleCount: 160, spread: 100, origin: { x: 0.5, y: 0.5 } }), 500);
         } else if (data.score >= 600) {
-          // Qualifier Tier: Standard celebratory confetti burst
           confetti({ particleCount: 130, spread: 75, origin: { y: 0.6 } });
         }
       } else {
@@ -344,7 +312,6 @@ function ArenaPageContent() {
     }
   };
 
-  // Bookmark toggle for post-exam review
   const handleToggleBookmark = async (qId: string) => {
     const next = !bookmarkedKeys[qId];
     setBookmarkedKeys((prev) => ({ ...prev, [qId]: next }));
@@ -360,79 +327,76 @@ function ArenaPageContent() {
     }
   };
 
-  // Toggle question accordion
   const toggleAccordion = (qId: string) => {
     setExpandedQuestions((prev) => ({ ...prev, [qId]: !prev[qId] }));
   };
 
-  // Format Timer Display
   const minutes = Math.floor(remainingSeconds / 60);
   const seconds = remainingSeconds % 60;
   const timeFormatted = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center gap-4 text-slate-400 p-4">
-        <div className="w-9 h-9 border-3 border-rose-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm font-medium text-center">
-          Synchronizing Competitive Arena & Randomizing Question Pool...
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4 text-[#777777] p-4">
+        <EulerSigma mood="thinking" size={80} />
+        <div className="w-8 h-8 border-4 border-[#7c3aed] border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm font-bold text-[#100f3e]">
+          Preparing your quiz arena challenge...
         </p>
       </div>
     );
   }
 
-  // Already Completed Screen (Strict Single Attempt Guard)
+  // Already Completed Screen
   if (alreadyCompletedNotice) {
     const attempt = alreadyCompletedNotice.attempt;
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
-        <div className="max-w-md w-full p-6 sm:p-8 rounded-3xl bg-slate-900 border border-slate-800 text-center space-y-6 shadow-2xl">
-          <div className="w-16 h-16 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto border border-amber-500/30">
-            <Trophy className="w-8 h-8" />
-          </div>
+      <div className="min-h-screen bg-[#fcfaff] flex items-center justify-center p-4">
+        <div className="max-w-md w-full p-8 rounded-3xl bg-white border-2 border-[#e5e5e5] text-center space-y-6 shadow-[0_6px_0_#e5e5e5]">
+          <EulerSigma mood="celebrating" size={100} className="mx-auto" />
 
           <div className="space-y-2">
-            <h1 className="text-xl sm:text-2xl font-black text-white">
-              Official Attempt Already Recorded
+            <h1 className="text-2xl font-black text-[#100f3e]">
+              Official Attempt Recorded!
             </h1>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              In accordance with Huawei ICT Competition Arena regulations, contestants are granted exactly 1 official attempt per weekly round.
+            <p className="text-sm font-bold text-[#777777] leading-relaxed">
+              Contestants are granted exactly 1 official attempt per weekly round. You can continue practicing in the Practice Pool!
             </p>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 grid grid-cols-2 gap-4">
+          <div className="p-4 rounded-2xl bg-[#f3e8ff] border-2 border-[#7c3aed]/20 grid grid-cols-2 gap-4">
             <div>
-              <div className="text-xs text-slate-400">Official Score</div>
-              <div className="text-2xl font-black text-rose-400">{attempt.score} / 1000</div>
+              <div className="text-xs font-black uppercase text-[#7c3aed]">Your Score</div>
+              <div className="text-3xl font-black text-[#7c3aed]">{attempt.score} / 1000</div>
             </div>
             <div>
-              <div className="text-xs text-slate-400">Time Taken</div>
-              <div className="text-2xl font-black text-white">{Math.round(attempt.timeTakenSeconds / 60)} mins</div>
+              <div className="text-xs font-black uppercase text-[#7c3aed]">Time Taken</div>
+              <div className="text-3xl font-black text-[#100f3e]">{Math.round(attempt.timeTakenSeconds / 60)}m</div>
             </div>
           </div>
 
           <div className="flex flex-col gap-3">
             <Link
               href={`/leaderboard?week=${weekNumber}`}
-              className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center gap-2 transition-colors shadow-lg shadow-rose-950/40"
+              className="btn-tactile-primary py-3.5 px-4 text-xs font-black tracking-wider w-full"
             >
-              <Trophy className="w-4 h-4" />
-              <span>View Track Leaderboard</span>
+              <Trophy className="w-4 h-4 mr-2" />
+              <span>View Leaderboard</span>
             </Link>
 
             <Link
               href="/mistakes"
-              className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center gap-2 transition-colors"
+              className="btn-tactile-secondary py-3 px-4 text-xs font-black tracking-wider w-full"
             >
-              <BookMarked className="w-4 h-4 text-rose-400" />
+              <BookMarked className="w-4 h-4 mr-2" />
               <span>Open Mistake Notebook</span>
             </Link>
 
             <Link
               href="/dashboard"
-              className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-slate-900 hover:bg-slate-800 text-slate-400 flex items-center justify-center gap-2 transition-colors"
+              className="text-xs font-bold text-[#777777] hover:text-[#100f3e] uppercase py-2"
             >
-              <span>Back to Dashboard</span>
+              Back to Dashboard
             </Link>
           </div>
         </div>
@@ -440,7 +404,7 @@ function ArenaPageContent() {
     );
   }
 
-  // Phase 6 Completed Screen: Multi-Tier Confetti Celebration & In-Depth Diagnostic Cards
+  // Quiz Completed Screen
   if (isCompleted && submissionResult) {
     const isMock = weekNumber === 6;
     const gradedResults: GradedResultItem[] = submissionResult.results || [];
@@ -449,162 +413,118 @@ function ArenaPageContent() {
     const isQualified = score >= 600;
 
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto space-y-8">
-          {/* Main Confetti Celebration Card */}
-          <div
-            className={`p-6 sm:p-8 rounded-3xl border text-center space-y-6 shadow-2xl relative overflow-hidden ${
-              isDistinction
-                ? "bg-gradient-to-b from-amber-950/40 via-slate-900 to-slate-900 border-amber-500/50 shadow-amber-950/30"
-                : isQualified
-                ? "bg-gradient-to-b from-emerald-950/40 via-slate-900 to-slate-900 border-emerald-500/50 shadow-emerald-950/30"
-                : "bg-slate-900 border-slate-800"
-            }`}
-          >
-            {/* Celebration Icon */}
-            <div
-              className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center mx-auto border shadow-xl ${
-                isDistinction
-                  ? "bg-amber-500/20 text-amber-400 border-amber-500/40"
-                  : isQualified
-                  ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
-                  : "bg-rose-500/20 text-rose-400 border-rose-500/40"
-              }`}
-            >
-              {isDistinction ? (
-                <Crown className="w-9 h-9 sm:w-10 sm:h-10 animate-bounce" />
-              ) : isQualified ? (
-                <CheckCircle2 className="w-9 h-9 sm:w-10 sm:h-10" />
-              ) : (
-                <AlertTriangle className="w-9 h-9 sm:w-10 sm:h-10" />
-              )}
-            </div>
+      <div className="min-h-screen bg-[#ffffff] text-[#100f3e] py-10 px-4 sm:px-6">
+        <div className="max-w-2xl mx-auto space-y-8">
+          {/* Main Victory Card */}
+          <div className="p-8 rounded-3xl bg-white border-2 border-[#e5e5e5] shadow-[0_6px_0_#e5e5e5] text-center space-y-6">
+            <EulerSigma
+              mood={isQualified ? "celebrating" : "encouraging"}
+              size={120}
+              className="mx-auto"
+            />
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <span
-                className={`text-xs font-black px-3 py-1 rounded-full border inline-block ${
+                className={`text-xs font-black px-3.5 py-1 rounded-full uppercase inline-block ${
                   isDistinction
-                    ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
+                    ? "bg-[#fff2d6] text-[#ff9600]"
                     : isQualified
-                    ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                    : "bg-rose-500/20 text-rose-400 border-rose-500/40"
+                    ? "bg-[#f3e8ff] text-[#7c3aed]"
+                    : "bg-[#ffdfe0] text-[#ff4b4b]"
                 }`}
               >
                 {isDistinction
-                  ? "🏆 TOP REGIONAL CONTENDER — DISTINCTION"
+                  ? "🏆 DISTINCTION TIER"
                   : isQualified
-                  ? "⭐ OFFICIAL PRELIMINARY QUALIFIER"
-                  : "ARENA ROUND COMPLETED"}
+                  ? "⭐ PRELIMINARY QUALIFIER"
+                  : "DRILL COMPLETED"}
               </span>
 
-              <h1 className="text-2xl sm:text-3xl font-black text-white pt-1">
+              <h1 className="text-3xl sm:text-4xl font-black text-[#100f3e]">
                 {isDistinction
-                  ? "Masterful Performance!"
+                  ? "Incredible Job!"
                   : isQualified
-                  ? "Qualifier Benchmark Achieved!"
-                  : "Keep Drilling to Reach 600 Pts!"}
+                  ? "Benchmark Reached!"
+                  : "Keep Practicing!"}
               </h1>
 
-              <p className="text-xs sm:text-sm text-slate-400 max-w-lg mx-auto leading-relaxed">
+              <p className="text-sm font-bold text-[#777777]">
                 {isMock
-                  ? "Huawei ICT Competition 2026–2027 Preliminary Stage Full Mock Simulation"
-                  : "Official Southern Africa Regional Arena Competitive Score Logged"}
+                  ? "Huawei ICT Competition Preliminary Stage Mock Simulation"
+                  : "Your official score has been posted to the Southern Africa Leaderboard."}
               </p>
             </div>
 
-            {/* Score Metric Grid */}
-            <div className="p-5 sm:p-6 rounded-2xl bg-slate-950/60 border border-slate-800 grid grid-cols-3 gap-3 sm:gap-4">
+            {/* Score Grid */}
+            <div className="p-6 rounded-2xl bg-[#f3e8ff] border-2 border-[#7c3aed]/20 grid grid-cols-3 gap-4">
               <div>
-                <div className="text-[11px] text-slate-400 font-medium">Final Score</div>
-                <div
-                  className={`text-2xl sm:text-4xl font-black ${
-                    isDistinction
-                      ? "text-amber-400"
-                      : isQualified
-                      ? "text-emerald-400"
-                      : "text-rose-400"
-                  }`}
-                >
+                <div className="text-xs font-black uppercase text-[#7c3aed]">Final Score</div>
+                <div className="text-3xl sm:text-4xl font-black text-[#7c3aed]">
                   {submissionResult.score}
                 </div>
-                <div className="text-[10px] text-slate-500">out of 1000</div>
+                <div className="text-[11px] font-bold text-[#777777]">out of 1000</div>
               </div>
 
               <div>
-                <div className="text-[11px] text-slate-400 font-medium">Correct Questions</div>
-                <div className="text-2xl sm:text-4xl font-black text-white">
-                  {submissionResult.correctCount}/{submissionResult.totalQuestions}
+                <div className="text-xs font-black uppercase text-[#7c3aed]">Accuracy</div>
+                <div className="text-3xl sm:text-4xl font-black text-[#100f3e]">
+                  {Math.round((submissionResult.correctCount / submissionResult.totalQuestions) * 100)}%
                 </div>
-                <div className="text-[10px] text-slate-500">
-                  {Math.round((submissionResult.correctCount / submissionResult.totalQuestions) * 100)}% Accuracy
+                <div className="text-[11px] font-bold text-[#777777]">
+                  {submissionResult.correctCount}/{submissionResult.totalQuestions} Correct
                 </div>
               </div>
 
               <div>
-                <div className="text-[11px] text-slate-400 font-medium">Time Elapsed</div>
-                <div className="text-2xl sm:text-4xl font-black text-white">
+                <div className="text-xs font-black uppercase text-[#7c3aed]">Time</div>
+                <div className="text-3xl sm:text-4xl font-black text-[#100f3e]">
                   {Math.round(submissionResult.timeTakenSeconds / 60)}m
                 </div>
-                <div className="text-[10px] text-slate-500 font-mono">
+                <div className="text-[11px] font-bold text-[#777777]">
                   {submissionResult.timeTakenSeconds}s
                 </div>
               </div>
-            </div>
-
-            {/* Proctor Integrity Telemetry Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/80 text-xs font-semibold text-slate-300">
-              <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
-              <span>
-                {tabSwitchCount === 0
-                  ? "Proctor Integrity: 100% Clean Session (0 Focus Departures)"
-                  : `Proctor Telemetry: ${tabSwitchCount} Window Focus Departure(s) Recorded`}
-              </span>
             </div>
 
             {/* Action Buttons */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
               <Link
                 href={`/leaderboard?week=${weekNumber}`}
-                className="py-3 px-4 rounded-xl font-bold text-xs bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center gap-2 transition-colors shadow-lg shadow-rose-950/40"
+                className="btn-tactile-primary py-3.5 px-4 text-xs font-black tracking-wider"
               >
-                <Trophy className="w-4 h-4" />
-                <span>View Leaderboard</span>
+                <Trophy className="w-4 h-4 mr-2" />
+                <span>Leaderboard</span>
               </Link>
 
               <Link
                 href="/mistakes"
-                className="py-3 px-4 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center justify-center gap-2 transition-colors"
+                className="btn-tactile-secondary py-3 px-4 text-xs font-black tracking-wider"
               >
-                <BookMarked className="w-4 h-4 text-rose-400" />
-                <span>Mistake Notebook</span>
+                <BookMarked className="w-4 h-4 mr-2" />
+                <span>Mistakes ({submissionResult.totalQuestions - submissionResult.correctCount})</span>
               </Link>
 
               <Link
                 href="/dashboard"
-                className="py-3 px-4 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 flex items-center justify-center gap-2 transition-colors"
+                className="btn-tactile-blue py-3.5 px-4 text-xs font-black tracking-wider"
               >
                 <span>Dashboard</span>
               </Link>
             </div>
           </div>
 
-          {/* Detailed Question Review Accordion */}
+          {/* Breakdown Review List */}
           {gradedResults.length > 0 && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-sky-400" />
-                    <span>Detailed Breakdown & Technical Explanations</span>
-                  </h2>
-                  <p className="text-xs text-slate-400">
-                    Review each question, check official solutions, and star questions for your revision notebook.
-                  </p>
-                </div>
+                <h2 className="text-xl font-black text-[#100f3e] flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-[#7c3aed]" />
+                  <span>Question Breakdown</span>
+                </h2>
 
                 <button
                   onClick={() => setShowReviewList(!showReviewList)}
-                  className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-colors"
+                  className="px-3 py-1.5 rounded-xl border-2 border-[#e5e5e5] text-xs font-black text-[#777777] hover:text-[#100f3e]"
                 >
                   {showReviewList ? "Collapse All" : "Expand All"}
                 </button>
@@ -617,36 +537,24 @@ function ArenaPageContent() {
                   return (
                     <div
                       key={item.questionId}
-                      className="p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all space-y-3"
+                      className="p-5 rounded-2xl bg-white border-2 border-[#e5e5e5] shadow-[0_3px_0_#e5e5e5] space-y-3"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center gap-2 flex-wrap text-xs">
                           <span
-                            className={`px-2 py-0.5 rounded-full font-bold flex items-center gap-1 ${
+                            className={`px-2.5 py-0.5 rounded-full font-black text-[11px] flex items-center gap-1 ${
                               item.isCorrect
-                                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                                : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
+                                ? "bg-[#f3e8ff] text-[#7c3aed]"
+                                : "bg-[#ffdfe0] text-[#ff4b4b]"
                             }`}
                           >
-                            {item.isCorrect ? (
-                              <>
-                                <CheckCircle2 className="w-3.5 h-3.5" />
-                                <span>Correct</span>
-                              </>
-                            ) : (
-                              <>
-                                <XCircle className="w-3.5 h-3.5" />
-                                <span>Incorrect</span>
-                              </>
-                            )}
+                            {item.isCorrect ? "CORRECT" : "INCORRECT"}
                           </span>
-
-                          <span className="font-semibold text-slate-400">
+                          <span className="font-extrabold text-[#777777]">
                             Q{idx + 1}
                           </span>
-
                           {item.domain && (
-                            <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-medium text-[11px]">
+                            <span className="px-2 py-0.5 rounded-md bg-[#f7f7f7] text-[#100f3e] font-bold text-[11px]">
                               {item.domain}
                             </span>
                           )}
@@ -655,72 +563,44 @@ function ArenaPageContent() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleToggleBookmark(item.questionId)}
-                            title="Star / Bookmark"
-                            className="p-1 rounded-lg text-slate-400 hover:text-amber-400 transition-colors"
+                            className="p-1 rounded-lg text-[#777777] hover:text-[#ff9600]"
                           >
                             <Star
                               className={`w-4 h-4 ${
-                                bookmarkedKeys[item.questionId] ? "fill-amber-400 text-amber-400" : ""
+                                bookmarkedKeys[item.questionId] ? "fill-[#ff9600] text-[#ff9600]" : ""
                               }`}
                             />
                           </button>
-
                           <button
                             onClick={() => toggleAccordion(item.questionId)}
-                            className="p-1 rounded-lg text-slate-400 hover:text-white transition-colors"
+                            className="p-1 rounded-lg text-[#777777] hover:text-[#100f3e]"
                           >
                             {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                           </button>
                         </div>
                       </div>
 
-                      <h3 className="text-sm font-semibold text-white leading-relaxed">
+                      <h3 className="text-sm font-extrabold text-[#100f3e] leading-snug">
                         {item.questionText || `Question #${idx + 1}`}
                       </h3>
 
                       {isExpanded && (
-                        <div className="space-y-3 pt-2 text-xs border-t border-slate-800/80">
-                          {item.options && item.options.length > 0 && (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                              {item.options.map((opt) => {
-                                const isCorrectOpt = opt.isCorrect;
-                                const isUserSelected = item.selectedKeys?.includes(opt.optionKey);
-
-                                let optBg = "bg-slate-950/60 border-slate-800/80 text-slate-400";
-                                if (isCorrectOpt) {
-                                  optBg = "bg-emerald-950/40 border-emerald-500/60 text-emerald-300 font-semibold";
-                                } else if (isUserSelected) {
-                                  optBg = "bg-rose-950/40 border-rose-500/60 text-rose-300";
-                                }
-
-                                return (
-                                  <div
-                                    key={opt.id}
-                                    className={`p-2.5 rounded-xl border flex items-start gap-2 ${optBg}`}
-                                  >
-                                    <span className="font-bold shrink-0">{opt.optionKey}.</span>
-                                    <span className="leading-snug">{opt.optionText}</span>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
-
-                          <div className="flex items-center justify-between text-[11px] text-slate-400">
+                        <div className="space-y-3 pt-2 text-xs border-t-2 border-[#f1f1f1]">
+                          <div className="flex items-center justify-between text-xs font-bold text-[#777777]">
                             <div>
-                              Your Selection: <span className="font-bold text-white">{item.selectedKeys.join(", ") || "(None)"}</span>
+                              Your Selection: <strong className="text-[#100f3e]">{item.selectedKeys.join(", ") || "(None)"}</strong>
                             </div>
                             <div>
-                              Correct Key(s): <span className="font-bold text-emerald-400">{item.correctKeys.join(", ")}</span>
+                              Correct Key: <strong className="text-[#7c3aed]">{item.correctKeys.join(", ")}</strong>
                             </div>
                           </div>
 
-                          <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-                            <div className="text-slate-300 font-semibold flex items-center gap-1.5">
-                              <Info className="w-3.5 h-3.5 text-sky-400" />
-                              <span>Official Technical Explanation:</span>
+                          <div className="p-3.5 rounded-xl bg-[#f3e8ff] border-2 border-[#7c3aed]/20 space-y-1">
+                            <div className="text-[#100f3e] font-black flex items-center gap-1.5">
+                              <Info className="w-4 h-4 text-[#7c3aed]" />
+                              <span>Technical Explanation:</span>
                             </div>
-                            <p className="pl-5 text-slate-400 font-mono text-[11px] leading-relaxed">
+                            <p className="text-xs font-bold text-[#777777] leading-relaxed">
                               {item.explanation}
                             </p>
                           </div>
@@ -739,172 +619,142 @@ function ArenaPageContent() {
 
   const currentQ = questions[currentIndex];
   const currentSelected = (currentQ && selectedAnswers[currentQ.id]) || [];
-  const answeredCount = Object.keys(selectedAnswers).filter(
-    (k) => (selectedAnswers[k] || []).length > 0
-  ).length;
+  const progressPercent = questions.length > 0 ? ((currentIndex + 1) / questions.length) * 100 : 0;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-transparent">
-      {/* Top Examination HUD */}
-      <header className="border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-xl sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between gap-1.5 sm:gap-3">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <span className="text-[11px] sm:text-xs font-black px-2 sm:px-2.5 py-1 rounded-md bg-rose-500/20 text-rose-400 border border-rose-500/30 whitespace-nowrap">
-              {weekNumber === 6 ? (
-                <>
-                  <span className="sm:hidden">MOCK</span>
-                  <span className="hidden sm:inline">PRELIMINARY MOCK (60 Qs)</span>
-                </>
-              ) : (
-                <>
-                  <span className="sm:hidden">W0{weekNumber}</span>
-                  <span className="hidden sm:inline">ARENA &bull; WEEK 0{weekNumber}</span>
-                </>
-              )}
-            </span>
-            <span className="text-xs text-slate-400 font-semibold hidden md:inline-block truncate max-w-xs">
-              {currentQ?.domain} &bull; {currentQ?.topic}
-            </span>
+    <div className="min-h-screen bg-white text-[#100f3e] flex flex-col justify-between selection:bg-transparent">
+      {/* Top Quiz Header */}
+      <header className="border-b-2 border-[#e5e5e5] bg-white sticky top-0 z-40 px-4 sm:px-8 py-3">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
+          <Link
+            href="/dashboard"
+            className="p-2 rounded-xl text-[#777777] hover:text-[#100f3e] hover:bg-[#f7f7f7] transition-colors"
+            title="Exit Arena"
+          >
+            <X className="w-6 h-6 stroke-[2.5]" />
+          </Link>
+
+          {/* Center: Tactile Glossy Progress Bar */}
+          <div className="flex-1 max-w-lg">
+            <div className="tactile-progress-track">
+              <div
+                className="tactile-progress-fill"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
           </div>
 
-          {/* Center: Mobile Question Palette Trigger Button */}
-          <button
-            onClick={() => setShowMobilePalette(true)}
-            className="sm:hidden px-2 py-1 rounded-lg bg-slate-800/80 border border-slate-700/80 text-[11px] font-bold text-slate-300 flex items-center gap-1 hover:bg-slate-700 transition-colors shrink-0"
-          >
-            <Layers className="w-3 h-3 text-rose-400" />
-            <span>
-              {currentIndex + 1}/{questions.length}
-            </span>
-          </button>
-
-          {/* Right Controls: Timer & Submit */}
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          {/* Right: Timer & Hearts */}
+          <div className="flex items-center gap-3">
             <div
-              className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl border font-mono font-bold text-xs sm:text-sm ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border-2 font-mono font-black text-xs sm:text-sm ${
                 remainingSeconds < 300
-                  ? "bg-rose-950/50 border-rose-500/60 text-rose-400 animate-pulse"
-                  : "bg-slate-800/80 border-slate-700 text-slate-200"
+                  ? "bg-[#ffdfe0] border-[#ff4b4b] text-[#ff4b4b] animate-pulse"
+                  : "bg-white border-[#e5e5e5] text-[#7c3aed]"
               }`}
             >
-              <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-slate-400" />
+              <Clock className="w-4 h-4" />
               <span>{timeFormatted}</span>
             </div>
 
-            <button
-              onClick={handleSubmitQuiz}
-              disabled={isSubmitting}
-              className="py-1 sm:py-2 px-2.5 sm:px-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white text-xs font-bold flex items-center gap-1 sm:gap-1.5 transition-all shadow-md shadow-rose-950/40 disabled:opacity-50 whitespace-nowrap"
-            >
-              <Send className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-              <span className="hidden sm:inline">Submit Exam</span>
-              <span className="sm:hidden">Submit</span>
-            </button>
+            <div className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-2xl bg-white border-2 border-[#e5e5e5] text-[#ff4b4b] font-black text-xs sm:text-sm">
+              <Heart className="w-4 h-4 fill-[#ff4b4b]" />
+              <span>5</span>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Main Examination Area */}
-      <main className="max-w-4xl mx-auto w-full px-3 sm:px-4 py-4 sm:py-8 flex-1 flex flex-col justify-between space-y-5 sm:space-y-8">
-        {/* Anti-Cheating Tab Switch Alert Banner */}
+      {/* Main Question Area */}
+      <main className="max-w-3xl mx-auto w-full px-4 sm:px-6 py-8 flex-1 flex flex-col justify-between">
         {blurWarning && (
-          <div className="p-4 rounded-2xl bg-amber-950/50 border border-amber-500/40 text-amber-200 text-xs flex items-center justify-between gap-3 animate-in fade-in shadow-lg">
-            <div className="flex items-center gap-2.5">
-              <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400" />
-              <span className="leading-relaxed">{blurWarning}</span>
+          <div className="mb-6 p-4 rounded-2xl bg-[#fff2d6] border-2 border-[#ff9600] text-[#100f3e] text-xs font-bold flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-[#ff9600] shrink-0" />
+              <span>{blurWarning}</span>
             </div>
             <button
               onClick={() => setBlurWarning(null)}
-              className="text-xs text-amber-400 hover:text-white px-2 py-1 rounded bg-amber-900/40 shrink-0 font-bold"
+              className="text-xs font-black text-[#ff9600] hover:underline shrink-0"
             >
-              Acknowledge
+              OK
             </button>
           </div>
         )}
 
-        {/* Anti-Cheating Clipboard Copy Warning */}
-        {copyWarning && (
-          <div className="p-3.5 rounded-xl bg-rose-950/60 border border-rose-500/50 text-rose-300 text-xs flex items-center gap-2 animate-in fade-in">
-            <ShieldAlert className="w-4 h-4 shrink-0 text-rose-400" />
-            <span>{copyWarning}</span>
-          </div>
-        )}
-
-        {/* Question Content Box */}
         {currentQ ? (
-          <div className="space-y-6 select-none">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-xs text-slate-400">
-                <span className="font-semibold text-slate-300">
-                  Question {currentIndex + 1} of {questions.length}
-                </span>
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold text-[11px]">
-                    {currentQ.questionType.replace("_", " ")}
+          <div className="space-y-8 select-none">
+            {/* Sigma Prompt */}
+            <div className="flex items-start gap-4">
+              <EulerSigma mood="thinking" size={64} className="shrink-0" />
+              <div className="flex-1 bg-white border-2 border-[#e5e5e5] rounded-3xl p-5 shadow-[0_4px_0_#e5e5e5] relative">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-black text-[#7c3aed] uppercase tracking-wider">
+                    {currentQ.questionType === "MULTIPLE_CHOICE"
+                      ? "Select all correct options"
+                      : "Choose the correct answer"}
                   </span>
-                  <span className="hidden sm:inline-block px-2 py-0.5 rounded bg-sky-950/30 text-sky-400 border border-sky-800/40 text-[11px] font-semibold">
-                    {currentQ.domain}
-                  </span>
+                  <span className="text-xs font-bold text-[#777777]">•</span>
+                  <span className="text-xs font-bold text-[#777777]">{currentQ.domain}</span>
                 </div>
+                <h2 className="text-xl sm:text-2xl font-black text-[#100f3e] leading-snug">
+                  {currentQ.questionText}
+                </h2>
               </div>
-
-              <h2 className="text-lg sm:text-2xl font-bold text-white leading-relaxed tracking-tight">
-                {currentQ.questionText}
-              </h2>
             </div>
 
-            {/* Randomized Options List (Phase 6 Option Randomization) */}
-            <div className="space-y-3">
+            {/* Answer Options */}
+            <div className="space-y-3 pt-2">
               {currentQ.options.map((opt) => {
                 const isSelected = currentSelected.includes(opt.optionKey);
-                const displayLetter = opt.optionKey; // Display position label A, B, C, D
 
                 return (
-                  <button
+                  <div
                     key={opt.id}
                     onClick={() => handleSelectOption(opt.optionKey, opt.id)}
-                    className={`w-full text-left p-4 sm:p-4.5 rounded-2xl border transition-all duration-200 flex items-start gap-4 min-h-[58px] ${
-                      isSelected
-                        ? "bg-rose-950/30 border-rose-500 text-white shadow-lg shadow-rose-950/30 ring-1 ring-rose-500/50"
-                        : "bg-slate-900/80 border-slate-800 text-slate-300 hover:bg-slate-800/60 hover:border-slate-700 active:scale-[0.99]"
+                    className={`quiz-option-card p-4 sm:p-5 flex items-center gap-4 ${
+                      isSelected ? "selected" : ""
                     }`}
                   >
                     <div
-                      className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
+                      className={`w-9 h-9 rounded-xl font-black text-sm flex items-center justify-center shrink-0 border-2 transition-colors ${
                         isSelected
-                          ? "bg-rose-500 text-white shadow-md shadow-rose-900/40"
-                          : "bg-slate-800 text-slate-400 border border-slate-700"
+                          ? "bg-[#7c3aed] border-[#7c3aed] text-white"
+                          : "bg-[#f7f7f7] border-[#e5e5e5] text-[#777777]"
                       }`}
                     >
-                      {displayLetter}
+                      {opt.optionKey}
                     </div>
-                    <span className="text-sm sm:text-base leading-snug pt-0.5 font-medium flex-1">
+
+                    <span className="text-base sm:text-lg font-bold text-[#100f3e] leading-snug flex-1">
                       {opt.optionText}
                     </span>
-                  </button>
+                  </div>
                 );
               })}
             </div>
           </div>
         ) : (
-          <div className="text-center text-slate-400 py-12">
+          <div className="text-center py-12 text-[#777777] font-bold">
             No questions available for this module.
           </div>
         )}
+      </main>
 
-        {/* Question Navigation Bar (Desktop Jump Dots & Mobile Navigation) */}
-        <div className="pt-4 sm:pt-6 border-t border-slate-800/80 flex items-center justify-between gap-2 sm:gap-3">
+      {/* Sticky Bottom Action Footer */}
+      <footer className="border-t-2 border-[#e5e5e5] bg-white py-4 px-4 sm:px-8 sticky bottom-0 z-40">
+        <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
           <button
             onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
             disabled={currentIndex === 0}
-            className="py-2 px-3 sm:py-2.5 sm:px-4 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-xs font-bold flex items-center gap-1.5 sm:gap-2 disabled:opacity-30 transition-colors shrink-0"
+            className="btn-tactile-secondary py-3.5 px-5 text-xs font-black uppercase tracking-wider"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="hidden xs:inline sm:inline">Previous</span>
+            <ArrowLeft className="w-4 h-4 mr-1.5" />
+            <span>Back</span>
           </button>
 
-          {/* Desktop Quick Jump Dots */}
-          <div className="hidden sm:flex items-center gap-1.5 max-w-sm overflow-x-auto py-1">
+          {/* Quick Question Dots */}
+          <div className="hidden sm:flex items-center gap-1.5 max-w-xs overflow-x-auto py-1">
             {questions.map((q, idx) => {
               const answered = (selectedAnswers[q.id] || []).length > 0;
               const isCurrent = idx === currentIndex;
@@ -912,12 +762,12 @@ function ArenaPageContent() {
                 <button
                   key={q.id}
                   onClick={() => setCurrentIndex(idx)}
-                  className={`w-7 h-7 rounded-lg text-[11px] font-bold transition-all ${
+                  className={`w-7 h-7 rounded-xl text-xs font-black transition-all ${
                     isCurrent
-                      ? "bg-rose-600 text-white shadow-md shadow-rose-900/50 scale-110"
+                      ? "bg-[#7c3aed] text-white shadow-[0_2px_0_#5b21b6]"
                       : answered
-                      ? "bg-emerald-950/40 text-emerald-300 border border-emerald-500/50"
-                      : "bg-slate-950 text-slate-600 border border-slate-900 hover:border-slate-800"
+                      ? "bg-[#f3e8ff] text-[#7c3aed] border-2 border-[#7c3aed]"
+                      : "bg-[#f7f7f7] text-[#777777] border-2 border-[#e5e5e5]"
                   }`}
                 >
                   {idx + 1}
@@ -926,91 +776,27 @@ function ArenaPageContent() {
             })}
           </div>
 
-          {/* Mobile Sheet Trigger */}
-          <button
-            onClick={() => setShowMobilePalette(true)}
-            className="sm:hidden py-1.5 px-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-slate-300 flex items-center gap-1.5 shrink-0"
-          >
-            <Layers className="w-3.5 h-3.5 text-rose-400" />
-            <span>{currentIndex + 1} / {questions.length}</span>
-          </button>
-
-          <button
-            onClick={() =>
-              setCurrentIndex((prev) => Math.min(questions.length - 1, prev + 1))
-            }
-            disabled={currentIndex === questions.length - 1}
-            className="py-2 px-3 sm:py-2.5 sm:px-4 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-xs font-bold flex items-center gap-1.5 sm:gap-2 disabled:opacity-30 transition-colors shrink-0"
-          >
-            <span className="hidden xs:inline sm:inline">Next</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
+          {/* Next / Submit Button */}
+          {currentIndex === questions.length - 1 ? (
+            <button
+              onClick={handleSubmitQuiz}
+              disabled={isSubmitting}
+              className="btn-tactile-primary py-3.5 px-8 text-sm font-black uppercase tracking-wider"
+            >
+              <Send className="w-4 h-4 mr-2" />
+              <span>Submit Arena</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => setCurrentIndex((prev) => Math.min(questions.length - 1, prev + 1))}
+              className="btn-tactile-primary py-3.5 px-8 text-sm font-black uppercase tracking-wider"
+            >
+              <span>Next</span>
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </button>
+          )}
         </div>
-      </main>
-
-      {/* Phase 6 Mobile Question Navigator Drawer / Sheet */}
-      {showMobilePalette && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:hidden">
-          <div className="w-full bg-slate-900 border-t border-slate-800 rounded-t-3xl p-5 space-y-4 max-h-[80vh] flex flex-col animate-in slide-in-from-bottom duration-200">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Layers className="w-4 h-4 text-rose-400" />
-                <h3 className="text-sm font-bold text-white">Question Navigator</h3>
-                <span className="text-[11px] text-slate-400 font-mono">
-                  ({answeredCount}/{questions.length} Answered)
-                </span>
-              </div>
-              <button
-                onClick={() => setShowMobilePalette(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-white"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Questions Grid */}
-            <div className="grid grid-cols-6 gap-2 overflow-y-auto py-2 flex-1">
-              {questions.map((q, idx) => {
-                const answered = (selectedAnswers[q.id] || []).length > 0;
-                const isCurrent = idx === currentIndex;
-                return (
-                  <button
-                    key={q.id}
-                    onClick={() => {
-                      setCurrentIndex(idx);
-                      setShowMobilePalette(false);
-                    }}
-                    className={`h-10 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center ${
-                      isCurrent
-                        ? "bg-rose-600 text-white shadow-lg shadow-rose-900/50 ring-2 ring-white"
-                        : answered
-                        ? "bg-emerald-950/60 text-emerald-300 border border-emerald-500/50"
-                        : "bg-slate-950 text-slate-500 border border-slate-800"
-                    }`}
-                  >
-                    <span>{idx + 1}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                <span>Answered</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-600" />
-                <span>Current</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-slate-800" />
-                <span>Pending</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      </footer>
     </div>
   );
 }
@@ -1019,7 +805,7 @@ export default function ArenaPage() {
   return (
     <React.Suspense
       fallback={
-        <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">
+        <div className="min-h-screen bg-white flex items-center justify-center font-bold text-[#777777]">
           Loading Arena...
         </div>
       }

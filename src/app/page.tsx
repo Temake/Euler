@@ -6,227 +6,286 @@ import {
   Cloud,
   Network,
   ArrowRight,
-  Lock,
   Flame,
   Zap,
   Timer,
-  BarChart3,
   Smartphone,
   Laptop,
+  CheckCircle2,
+  Sparkles,
 } from "lucide-react";
+import { EulerSigma } from "@/components/EulerSigma";
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1">
-      {/* Top Navigation */}
-      <header className="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-rose-600 to-red-500 flex items-center justify-center font-black text-lg sm:text-xl text-white shadow-lg shadow-rose-900/40 shrink-0">
-              E
-            </div>
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="text-lg sm:text-xl font-bold tracking-tight text-white">Euler</span>
-              <span className="hidden sm:inline-block text-[11px] font-semibold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                2026–2027
-              </span>
-            </div>
+    <div className="flex flex-col flex-1 bg-white">
+      {/* Top Header */}
+      <header className="border-b-2 border-[#e5e5e5] bg-white sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 h-18 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <EulerSigma mood="happy" size={44} />
+            <span className="text-2xl sm:text-3xl font-black tracking-tight text-[#7c3aed]">
+              euler
+            </span>
+            <span className="hidden sm:inline-flex text-xs font-black px-2.5 py-1 rounded-full bg-[#f3e8ff] text-[#7c3aed]">
+              2026–2027 ARENA
+            </span>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <Link
-              href="/admin"
-              className="hidden md:flex text-xs font-medium text-slate-400 hover:text-slate-200 transition-colors px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-800 hover:border-slate-700 items-center gap-1.5"
-            >
-              <Lock className="w-3.5 h-3.5 text-slate-500" />
-              <span>Admin</span>
-            </Link>
+          <div className="flex items-center gap-3">
             <Link
               href="/login"
-              className="text-xs sm:text-sm font-medium text-slate-300 hover:text-white px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-slate-900 transition-colors"
+              className="text-xs sm:text-sm font-black text-[#7c3aed] hover:bg-[#f3e8ff]/50 px-4 py-2.5 rounded-xl border-2 border-[#e5e5e5] shadow-[0_2px_0_#e5e5e5] active:translate-y-0.5 uppercase tracking-wider transition-all"
             >
               Log In
             </Link>
             <Link
               href="/register"
-              className="text-xs sm:text-sm font-semibold bg-rose-600 hover:bg-rose-500 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg shadow-lg shadow-rose-900/30 transition-all flex items-center gap-1.5"
+              className="btn-tactile-primary text-xs sm:text-sm py-2.5 px-5 flex items-center gap-1.5"
             >
-              <span>Join Arena</span>
-              <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span>Get Started</span>
+              <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
+      {/* Main Content Sections */}
       <main className="flex-1">
-        <section className="relative px-3 sm:px-6 lg:px-8 pt-12 sm:pt-20 pb-16 sm:pb-24 max-w-7xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[11px] sm:text-xs font-medium mb-6 max-w-[90vw] truncate">
-            <Flame className="w-3.5 h-3.5 text-rose-500 animate-pulse shrink-0" />
-            <span className="truncate">Huawei ICT Competition Southern Africa Official Arena</span>
+        {/* Section 1: Hero Band */}
+        <section className="px-4 sm:px-8 py-16 sm:py-24 max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-12">
+          {/* Sigma Emblem Centerpiece */}
+          <div className="flex-1 flex justify-center order-1 md:order-2">
+            <div className="relative">
+              <EulerSigma mood="celebrating" size={260} className="drop-shadow-sm" />
+              <div className="absolute -top-6 -right-6 sm:-right-10 bg-white border-2 border-[#e5e5e5] rounded-2xl p-3 sm:p-4 shadow-[0_4px_0_#e5e5e5] flex items-center gap-2.5">
+                <Flame className="w-5 h-5 text-[#ff9600] fill-[#ff9600]" />
+                <span className="text-xs sm:text-sm font-extrabold text-[#100f3e]">
+                  Ready for a quiz streak?
+                </span>
+              </div>
+            </div>
           </div>
 
-          <h1 className="text-3xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-[1.15] sm:leading-[1.1]">
-            Master the Exam. <br />
-            <span className="bg-gradient-to-r from-rose-500 via-red-400 to-amber-400 bg-clip-text text-transparent">
-              Dominate the Leaderboard.
-            </span>
-          </h1>
+          {/* Hero Copy & CTAs */}
+          <div className="flex-1 text-center md:text-left order-2 md:order-1">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#f3e8ff] text-[#7c3aed] text-xs font-black mb-6">
+              <Sparkles className="w-4 h-4" />
+              <span>Official Competition Prep Arena</span>
+            </div>
 
-          <p className="mt-4 sm:mt-6 text-base sm:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed px-2">
-            Euler is the high-velocity quiz platform designed specifically for contestants in the Cloud, Computing, and Network tracks. Structured 5-week curriculum, timed weekly arena drills, and full Preliminary exam simulation.
-          </p>
+            <h1 className="text-4xl sm:text-6xl font-black text-[#100f3e] tracking-tight leading-[1.1] mb-6">
+              The fun, gamified way to ace the exam.
+            </h1>
 
-          {/* Action CTAs */}
-          <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 max-w-md sm:max-w-none mx-auto px-4 sm:px-0">
+            <p className="text-lg sm:text-xl text-[#777777] font-semibold leading-relaxed mb-8 max-w-xl">
+              Learn faster through bite-sized practice drills, weekly timed arenas, and competitive leaderboards across Cloud, Computing, and Network tracks.
+            </p>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+              <Link
+                href="/register"
+                className="btn-tactile-primary px-8 py-4 text-base flex items-center justify-center gap-2"
+              >
+                <span>Join The Arena</span>
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+              <Link
+                href="/login"
+                className="px-8 py-4 rounded-2xl bg-white hover:bg-[#f3e8ff]/40 text-[#7c3aed] border-2 border-[#e5e5e5] font-black text-base uppercase tracking-wider shadow-[0_2px_0_#e5e5e5] active:translate-y-0.5 transition-all text-center"
+              >
+                I already have an account
+              </Link>
+            </div>
+
+            {/* Sync Badge */}
+            <div className="mt-8 flex items-center justify-center md:justify-start gap-2 text-xs font-bold text-[#777777]">
+              <Smartphone className="w-4 h-4 text-[#7c3aed]" />
+              <span>Mobile Phone</span>
+              <span>⇄</span>
+              <Laptop className="w-4 h-4 text-[#1cb0f6]" />
+              <span>PC Handover</span>
+              <span>•</span>
+              <span className="text-[#7c3aed]">Live sync during quizzes</span>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 2: Tracks Band */}
+        <section className="bg-[#fcfaff] border-y-2 border-[#e5e5e5] py-20 px-4 sm:px-8">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center max-w-2xl mx-auto mb-16">
+              <span className="text-xs font-black uppercase tracking-widest text-[#7c3aed] bg-white px-3 py-1 rounded-full border border-[#7c3aed]/20">
+                Choose Your Specialization
+              </span>
+              <h2 className="text-3xl sm:text-5xl font-black text-[#100f3e] tracking-tight mt-3">
+                Three High-Octane Learning Tracks
+              </h2>
+              <p className="text-base sm:text-lg text-[#777777] font-semibold mt-3">
+                Curated with official syllabi, weekly unlocking modules, and real mock exam simulations.
+              </p>
+            </div>
+
+            {/* Track Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Cloud Track */}
+              <div className="bg-white rounded-3xl p-6 border-2 border-[#e5e5e5] shadow-[0_6px_0_#e5e5e5] hover:-translate-y-1 hover:shadow-[0_8px_0_#1cb0f6] hover:border-[#1cb0f6] transition-all flex flex-col justify-between">
+                <div>
+                  <div className="w-14 h-14 rounded-2xl bg-[#ddf4ff] text-[#1cb0f6] flex items-center justify-center mb-6 shadow-[0_2px_0_#bde6ff]">
+                    <Cloud className="w-7 h-7" />
+                  </div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-xl font-black text-[#100f3e]">Cloud Track</h3>
+                    <span className="text-xs font-black px-2 py-0.5 rounded-full bg-[#ddf4ff] text-[#1cb0f6]">
+                      60% Cloud / 40% AI
+                    </span>
+                  </div>
+                  <p className="text-sm font-semibold text-[#777777] leading-relaxed mb-6">
+                    Master Huawei ECS, OBS, RDS, VPC networking, CCE Kubernetes, and ModelArts enterprise AI.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2 pt-4 border-t-2 border-[#f1f1f1]">
+                  <span className="text-xs font-black px-2.5 py-1 rounded-xl bg-[#f7f7f7] text-[#100f3e]">Huawei Cloud</span>
+                  <span className="text-xs font-black px-2.5 py-1 rounded-xl bg-[#f7f7f7] text-[#100f3e]">ModelArts</span>
+                  <span className="text-xs font-black px-2.5 py-1 rounded-xl bg-[#f7f7f7] text-[#100f3e]">LLM & RAG</span>
+                </div>
+              </div>
+
+              {/* Computing Track */}
+              <div className="bg-white rounded-3xl p-6 border-2 border-[#e5e5e5] shadow-[0_6px_0_#e5e5e5] hover:-translate-y-1 hover:shadow-[0_8px_0_#ff9600] hover:border-[#ff9600] transition-all flex flex-col justify-between">
+                <div>
+                  <div className="w-14 h-14 rounded-2xl bg-[#fff2d6] text-[#ff9600] flex items-center justify-center mb-6 shadow-[0_2px_0_#ffe0a3]">
+                    <Cpu className="w-7 h-7" />
+                  </div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-xl font-black text-[#100f3e]">Computing Track</h3>
+                    <span className="text-xs font-black px-2 py-0.5 rounded-full bg-[#fff2d6] text-[#ff9600]">
+                      openEuler & openGauss
+                    </span>
+                  </div>
+                  <p className="text-sm font-semibold text-[#777777] leading-relaxed mb-6">
+                    Drill openEuler OS administration, openGauss enterprise DB architecture, and Kunpeng processor tuning.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2 pt-4 border-t-2 border-[#f1f1f1]">
+                  <span className="text-xs font-black px-2.5 py-1 rounded-xl bg-[#f7f7f7] text-[#100f3e]">openEuler CLI</span>
+                  <span className="text-xs font-black px-2.5 py-1 rounded-xl bg-[#f7f7f7] text-[#100f3e]">openGauss DB</span>
+                  <span className="text-xs font-black px-2.5 py-1 rounded-xl bg-[#f7f7f7] text-[#100f3e]">Kunpeng DevKit</span>
+                </div>
+              </div>
+
+              {/* Network Track */}
+              <div className="bg-white rounded-3xl p-6 border-2 border-[#e5e5e5] shadow-[0_6px_0_#e5e5e5] hover:-translate-y-1 hover:shadow-[0_8px_0_#7c3aed] hover:border-[#7c3aed] transition-all flex flex-col justify-between">
+                <div>
+                  <div className="w-14 h-14 rounded-2xl bg-[#f3e8ff] text-[#7c3aed] flex items-center justify-center mb-6 shadow-[0_2px_0_#e9d5ff]">
+                    <Network className="w-7 h-7" />
+                  </div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-xl font-black text-[#100f3e]">Network Track</h3>
+                    <span className="text-xs font-black px-2 py-0.5 rounded-full bg-[#f3e8ff] text-[#7c3aed]">
+                      Datacom & Security
+                    </span>
+                  </div>
+                  <p className="text-sm font-semibold text-[#777777] leading-relaxed mb-6">
+                    Master Huawei VRP routing, OSPF, IPv6 Enhanced, next-generation Firewalls, and WLAN wireless networks.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2 pt-4 border-t-2 border-[#f1f1f1]">
+                  <span className="text-xs font-black px-2.5 py-1 rounded-xl bg-[#f7f7f7] text-[#100f3e]">HCIA-Datacom</span>
+                  <span className="text-xs font-black px-2.5 py-1 rounded-xl bg-[#f7f7f7] text-[#100f3e]">OSPF & IPv6</span>
+                  <span className="text-xs font-black px-2.5 py-1 rounded-xl bg-[#f7f7f7] text-[#100f3e]">WLAN Campus</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 3: Features Band */}
+        <section className="py-20 px-4 sm:px-8 max-w-6xl mx-auto">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <h2 className="text-3xl sm:text-5xl font-black text-[#100f3e] tracking-tight">
+              Why Contestants Love Euler
+            </h2>
+            <p className="text-base sm:text-lg text-[#777777] font-semibold mt-3">
+              Built to turn stressful exam revision into an engaging, daily habit.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="p-6 rounded-3xl bg-white border-2 border-[#e5e5e5] shadow-[0_4px_0_#e5e5e5] text-center flex flex-col items-center">
+              <div className="w-14 h-14 rounded-2xl bg-[#fff2d6] text-[#ff9600] flex items-center justify-center mb-4">
+                <Flame className="w-7 h-7 fill-[#ff9600]" />
+              </div>
+              <h4 className="text-lg font-black text-[#100f3e] mb-2">Daily Streak Engine</h4>
+              <p className="text-sm font-semibold text-[#777777] leading-relaxed">
+                Build momentum with daily 5-minute drills and keep your fire burning every single day.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-3xl bg-white border-2 border-[#e5e5e5] shadow-[0_4px_0_#e5e5e5] text-center flex flex-col items-center">
+              <div className="w-14 h-14 rounded-2xl bg-[#ddf4ff] text-[#1cb0f6] flex items-center justify-center mb-4">
+                <Timer className="w-7 h-7" />
+              </div>
+              <h4 className="text-lg font-black text-[#100f3e] mb-2">Weekly Timed Arena</h4>
+              <p className="text-sm font-semibold text-[#777777] leading-relaxed">
+                Simulate high-pressure arena rounds with strict server countdown and single attempts.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-3xl bg-white border-2 border-[#e5e5e5] shadow-[0_4px_0_#e5e5e5] text-center flex flex-col items-center">
+              <div className="w-14 h-14 rounded-2xl bg-[#f3e8ff] text-[#7c3aed] flex items-center justify-center mb-4">
+                <Trophy className="w-7 h-7" />
+              </div>
+              <h4 className="text-lg font-black text-[#100f3e] mb-2">League Leaderboards</h4>
+              <p className="text-sm font-semibold text-[#777777] leading-relaxed">
+                Climb the ranks, earn promotion medals, and compare your accuracy with peer contestants.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-3xl bg-white border-2 border-[#e5e5e5] shadow-[0_4px_0_#e5e5e5] text-center flex flex-col items-center">
+              <div className="w-14 h-14 rounded-2xl bg-[#ffdfe0] text-[#ff4b4b] flex items-center justify-center mb-4">
+                <ShieldCheck className="w-7 h-7" />
+              </div>
+              <h4 className="text-lg font-black text-[#100f3e] mb-2">Mock Exam Replica</h4>
+              <p className="text-sm font-semibold text-[#777777] leading-relaxed">
+                Experience the 60-question, 60-minute, 1,000-point full simulation before exam day.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 4: Final Bottom Callout */}
+        <section className="bg-[#fcfaff] border-t-2 border-[#e5e5e5] py-20 px-4 sm:px-8 text-center">
+          <div className="max-w-3xl mx-auto flex flex-col items-center">
+            <EulerSigma mood="encouraging" size={120} className="mb-4" />
+            <h2 className="text-3xl sm:text-5xl font-black text-[#100f3e] tracking-tight mb-4">
+              Ready to claim your spot on the podium?
+            </h2>
+            <p className="text-base sm:text-lg text-[#777777] font-semibold mb-8 max-w-xl">
+              Start practicing in under 30 seconds. 100% free for competition students.
+            </p>
             <Link
               href="/register"
-              className="px-6 sm:px-8 py-3.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-semibold shadow-xl shadow-rose-950/50 hover:shadow-rose-900/50 transition-all flex items-center justify-center gap-2 group text-sm sm:text-base"
+              className="btn-tactile-primary px-10 py-5 text-lg"
             >
-              <span>Enter Competition</span>
-              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
+              Start Learning Now
             </Link>
-            <Link
-              href="/login"
-              className="px-6 sm:px-8 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 font-semibold transition-all text-sm sm:text-base flex items-center justify-center"
-            >
-              Existing Contestant Login
-            </Link>
-          </div>
-
-          {/* Device Handover Badge */}
-          <div className="mt-8 inline-flex flex-wrap items-center justify-center gap-2 text-[11px] sm:text-xs text-slate-400 bg-slate-900/60 border border-slate-800/80 rounded-2xl sm:rounded-full px-3.5 py-1.5 max-w-md mx-auto">
-            <div className="flex items-center gap-1.5">
-              <Smartphone className="w-3.5 h-3.5 text-rose-400" />
-              <span>Mobile</span>
-              <span className="text-slate-600">⇄</span>
-              <Laptop className="w-3.5 h-3.5 text-emerald-400" />
-              <span>PC Handover</span>
-            </div>
-            <span className="text-slate-600 hidden sm:inline">•</span>
-            <span className="text-slate-300">Seamless real-time quiz synchronization</span>
-          </div>
-
-          {/* Three Tracks Grid */}
-          <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-            {/* Cloud Track */}
-            <div className="relative group p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-sky-500/40 hover:bg-slate-900 transition-all shadow-xl">
-              <div className="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center mb-4">
-                <Cloud className="w-6 h-6" />
-              </div>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xl font-bold text-white group-hover:text-sky-400 transition-colors">
-                  Cloud Track
-                </h3>
-                <span className="text-xs px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 font-mono">
-                  60% Cloud / 40% AI
-                </span>
-              </div>
-              <p className="text-sm text-slate-400 leading-relaxed">
-                ECS, BMS, VPC, OBS, RDS, GeminiDB, CCE/K8s, and ModelArts all-scenario AI platform.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-1.5">
-                <span className="text-xs px-2 py-1 rounded bg-slate-800 text-slate-300 font-medium">Huawei Cloud</span>
-                <span className="text-xs px-2 py-1 rounded bg-slate-800 text-slate-300 font-medium">ModelArts</span>
-                <span className="text-xs px-2 py-1 rounded bg-slate-800 text-slate-300 font-medium">LLM & RAG</span>
-              </div>
-            </div>
-
-            {/* Computing Track */}
-            <div className="relative group p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-amber-500/40 hover:bg-slate-900 transition-all shadow-xl">
-              <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mb-4">
-                <Cpu className="w-6 h-6" />
-              </div>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xl font-bold text-white group-hover:text-amber-400 transition-colors">
-                  Computing Track
-                </h3>
-                <span className="text-xs px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 font-mono">
-                  openEuler & openGauss
-                </span>
-              </div>
-              <p className="text-sm text-slate-400 leading-relaxed">
-                openEuler CLI & kernel management, openGauss SQL architecture, and Kunpeng DevKit & BoostKit tuning.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-1.5">
-                <span className="text-xs px-2 py-1 rounded bg-slate-800 text-slate-300 font-medium">openEuler</span>
-                <span className="text-xs px-2 py-1 rounded bg-slate-800 text-slate-300 font-medium">openGauss</span>
-                <span className="text-xs px-2 py-1 rounded bg-slate-800 text-slate-300 font-medium">Kunpeng DevKit</span>
-              </div>
-            </div>
-
-            {/* Network Track */}
-            <div className="relative group p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-emerald-500/40 hover:bg-slate-900 transition-all shadow-xl">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mb-4">
-                <Network className="w-6 h-6" />
-              </div>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xl font-bold text-white group-hover:text-emerald-400 transition-colors">
-                  Network Track
-                </h3>
-                <span className="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-mono">
-                  Datacom & Security
-                </span>
-              </div>
-              <p className="text-sm text-slate-400 leading-relaxed">
-                VRP switching, VLAN, STP, OSPF, IPv6 Enhanced, Firewall security zones, IPsec VPN, and WLAN CAPWAP.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-1.5">
-                <span className="text-xs px-2 py-1 rounded bg-slate-800 text-slate-300 font-medium">HCIA-Datacom</span>
-                <span className="text-xs px-2 py-1 rounded bg-slate-800 text-slate-300 font-medium">Firewalls</span>
-                <span className="text-xs px-2 py-1 rounded bg-slate-800 text-slate-300 font-medium">WLAN & DCN</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Platform Pillars */}
-          <div className="mt-20 border-t border-slate-800/80 pt-16">
-            <h2 className="text-2xl font-bold text-white mb-12">Engineered for Competitive Excellence</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
-              <div className="p-5 rounded-xl bg-slate-900/40 border border-slate-800/60">
-                <Zap className="w-6 h-6 text-rose-400 mb-3" />
-                <h4 className="font-semibold text-white mb-1">Instant Drill Feedback</h4>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Practice questions reveal detailed official Huawei technical explanations immediately.
-                </p>
-              </div>
-
-              <div className="p-5 rounded-xl bg-slate-900/40 border border-slate-800/60">
-                <Timer className="w-6 h-6 text-amber-400 mb-3" />
-                <h4 className="font-semibold text-white mb-1">Weekly Timed Arena</h4>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  30 questions in 30 minutes with strict single-attempt submission and server-verified countdown.
-                </p>
-              </div>
-
-              <div className="p-5 rounded-xl bg-slate-900/40 border border-slate-800/60">
-                <Trophy className="w-6 h-6 text-yellow-400 mb-3" />
-                <h4 className="font-semibold text-white mb-1">Live Track Leaderboard</h4>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Weekly and cumulative season standings ranked by score and tie-broken by time taken.
-                </p>
-              </div>
-
-              <div className="p-5 rounded-xl bg-slate-900/40 border border-slate-800/60">
-                <ShieldCheck className="w-6 h-6 text-emerald-400 mb-3" />
-                <h4 className="font-semibold text-white mb-1">Week 6 Mock Simulator</h4>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Exact replica of Huawei Preliminary rules: 60 questions, 60 minutes, 1,000 points.
-                </p>
-              </div>
-            </div>
           </div>
         </section>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800/80 bg-slate-950/60 py-8 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p>© 2026–2027 Euler. Built for Huawei ICT Competition Prep.</p>
-          <div className="flex items-center gap-6">
-            <Link href="/login" className="hover:text-slate-300 transition-colors">Contestant Login</Link>
-            <Link href="/register" className="hover:text-slate-300 transition-colors">Register</Link>
-            <Link href="/admin" className="hover:text-slate-300 transition-colors">Admin Portal</Link>
+      <footer className="border-t-2 border-[#e5e5e5] bg-white py-10 px-4 text-center">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-2.5">
+            <EulerSigma mood="happy" size={32} />
+            <span className="font-extrabold text-[#7c3aed] text-lg">euler</span>
+            <span className="text-xs text-[#777777] font-bold">© 2026–2027 Competition Arena</span>
+          </div>
+          <div className="flex items-center gap-6 text-xs font-black uppercase tracking-wider text-[#777777]">
+            <Link href="/login" className="hover:text-[#7c3aed] transition-colors">Contestant Login</Link>
+            <Link href="/register" className="hover:text-[#7c3aed] transition-colors">Register</Link>
           </div>
         </div>
       </footer>

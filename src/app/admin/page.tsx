@@ -26,6 +26,7 @@ import {
   X,
   Flame,
 } from "lucide-react";
+import { EulerSigma } from "@/components/EulerSigma";
 
 interface AdminTrackWeek {
   id: string;
@@ -225,9 +226,10 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center gap-4 text-slate-400">
-        <div className="w-8 h-8 border-3 border-rose-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm font-medium">Verifying Administrator Privileges...</p>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4 text-[#777777]">
+        <EulerSigma mood="thinking" size={90} />
+        <div className="w-8 h-8 border-4 border-[#7c3aed] border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm font-black text-[#100f3e]">Verifying Administrator Privileges...</p>
       </div>
     );
   }
@@ -244,18 +246,17 @@ export default function AdminPage() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-rose-500 selection:text-white">
-      {/* Header */}
-      <header className="border-b border-rose-900/30 bg-slate-900/80 backdrop-blur-xl sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-rose-600 to-red-700 flex items-center justify-center shadow-lg shadow-rose-950/60 shrink-0">
-              <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-            </div>
-            <div className="min-w-0">
-              <span className="font-extrabold text-sm sm:text-lg text-white truncate">Euler Admin</span>
-              <span className="hidden sm:inline-block ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                Exam Proctor Master
+    <div className="min-h-screen bg-white text-[#100f3e] flex flex-col justify-between selection:bg-[#7c3aed] selection:text-white">
+      {/* Top Header */}
+      <header className="border-b-2 border-[#e5e5e5] bg-white sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <EulerSigma mood="neutral" size={40} />
+            <div className="flex items-center gap-2">
+              <span className="font-black text-2xl tracking-tight text-[#7c3aed]">euler</span>
+              <span className="text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#ffdfe0] text-[#ff4b4b] border border-[#ff4b4b]/20 flex items-center gap-1">
+                <ShieldAlert className="w-3.5 h-3.5" />
+                <span>Proctor Master</span>
               </span>
             </div>
           </div>
@@ -263,14 +264,13 @@ export default function AdminPage() {
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Link
               href="/dashboard"
-              className="text-xs text-slate-400 hover:text-slate-200 px-2.5 sm:px-3 py-1.5 rounded-lg bg-slate-800/60 border border-slate-700/60 transition-colors"
+              className="btn-tactile-secondary py-2 px-3.5 text-xs font-bold"
             >
-              <span className="hidden sm:inline">View Student App</span>
-              <span className="sm:hidden">Student App</span>
+              <span>Student View</span>
             </Link>
             <button
               onClick={handleLogout}
-              className="p-1.5 sm:p-2 rounded-lg bg-slate-800/60 hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 transition-colors border border-slate-700/60"
+              className="p-2.5 rounded-2xl bg-white hover:bg-[#ffdfe0] text-[#777777] hover:text-[#ff4b4b] transition-colors border-2 border-[#e5e5e5] shadow-[0_2px_0_#e5e5e5] active:translate-y-0.5 active:shadow-none cursor-pointer"
               title="Admin Logout"
             >
               <LogOut className="w-4 h-4" />
@@ -280,95 +280,95 @@ export default function AdminPage() {
       </header>
 
       {/* Main Admin Body */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
+      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 flex-1 space-y-8">
         {/* Global Statistics Overview */}
         {stats && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <div className="text-2xl font-black text-white">{stats.totalContestants}</div>
-              <div className="text-xs text-slate-400 flex items-center gap-1 mt-1">
-                <Users className="w-3.5 h-3.5 text-rose-400" />
-                <span>Total Contestants</span>
+            <div className="p-5 rounded-3xl bg-white border-2 border-[#e5e5e5] shadow-[0_4px_0_#e5e5e5] space-y-1">
+              <div className="w-8 h-8 rounded-xl bg-[#f3e8ff] text-[#7c3aed] flex items-center justify-center mb-2">
+                <Users className="w-4 h-4" />
               </div>
+              <div className="text-2xl sm:text-3xl font-black text-[#100f3e]">{stats.totalContestants}</div>
+              <div className="text-xs font-bold text-[#777777]">Total Contestants</div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <div className="text-2xl font-black text-sky-400">{stats.cloudContestants}</div>
-              <div className="text-xs text-slate-400 flex items-center gap-1 mt-1">
-                <Cloud className="w-3.5 h-3.5 text-sky-400" />
-                <span>Cloud Track</span>
+            <div className="p-5 rounded-3xl bg-white border-2 border-[#e5e5e5] shadow-[0_4px_0_#e5e5e5] space-y-1">
+              <div className="w-8 h-8 rounded-xl bg-[#ddf4ff] text-[#1cb0f6] flex items-center justify-center mb-2">
+                <Cloud className="w-4 h-4" />
               </div>
+              <div className="text-2xl sm:text-3xl font-black text-[#1cb0f6]">{stats.cloudContestants}</div>
+              <div className="text-xs font-bold text-[#777777]">Cloud Track</div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <div className="text-2xl font-black text-amber-400">{stats.computingContestants}</div>
-              <div className="text-xs text-slate-400 flex items-center gap-1 mt-1">
-                <Cpu className="w-3.5 h-3.5 text-amber-400" />
-                <span>Computing Track</span>
+            <div className="p-5 rounded-3xl bg-white border-2 border-[#e5e5e5] shadow-[0_4px_0_#e5e5e5] space-y-1">
+              <div className="w-8 h-8 rounded-xl bg-[#fff2d6] text-[#ff9600] flex items-center justify-center mb-2">
+                <Cpu className="w-4 h-4" />
               </div>
+              <div className="text-2xl sm:text-3xl font-black text-[#ff9600]">{stats.computingContestants}</div>
+              <div className="text-xs font-bold text-[#777777]">Computing Track</div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <div className="text-2xl font-black text-emerald-400">{stats.networkContestants}</div>
-              <div className="text-xs text-slate-400 flex items-center gap-1 mt-1">
-                <Network className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Network Track</span>
+            <div className="p-5 rounded-3xl bg-white border-2 border-[#e5e5e5] shadow-[0_4px_0_#e5e5e5] space-y-1">
+              <div className="w-8 h-8 rounded-xl bg-[#f3e8ff] text-[#7c3aed] flex items-center justify-center mb-2">
+                <Network className="w-4 h-4" />
               </div>
+              <div className="text-2xl sm:text-3xl font-black text-[#7c3aed]">{stats.networkContestants}</div>
+              <div className="text-xs font-bold text-[#777777]">Network Track</div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <div className="text-2xl font-black text-purple-400">{stats.activeSessions}</div>
-              <div className="text-xs text-slate-400 flex items-center gap-1 mt-1">
-                <Smartphone className="w-3.5 h-3.5 text-purple-400" />
-                <span>Active Devices</span>
+            <div className="p-5 rounded-3xl bg-white border-2 border-[#e5e5e5] shadow-[0_4px_0_#e5e5e5] space-y-1">
+              <div className="w-8 h-8 rounded-xl bg-[#f3e8ff] text-[#7c3aed] flex items-center justify-center mb-2">
+                <Smartphone className="w-4 h-4" />
               </div>
+              <div className="text-2xl sm:text-3xl font-black text-[#7c3aed]">{stats.activeSessions}</div>
+              <div className="text-xs font-bold text-[#777777]">Active Devices</div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <div className="text-2xl font-black text-rose-400">{stats.totalQuizzesCompleted}</div>
-              <div className="text-xs text-slate-400 flex items-center gap-1 mt-1">
-                <Flame className="w-3.5 h-3.5 text-rose-400" />
-                <span>Quizzes Taken</span>
+            <div className="p-5 rounded-3xl bg-white border-2 border-[#e5e5e5] shadow-[0_4px_0_#e5e5e5] space-y-1">
+              <div className="w-8 h-8 rounded-xl bg-[#ffdfe0] text-[#ff4b4b] flex items-center justify-center mb-2">
+                <Flame className="w-4 h-4 fill-[#ff4b4b]" />
               </div>
+              <div className="text-2xl sm:text-3xl font-black text-[#ff4b4b]">{stats.totalQuizzesCompleted}</div>
+              <div className="text-xs font-bold text-[#777777]">Quizzes Taken</div>
             </div>
           </div>
         )}
 
         {/* Section Navigation Tabs */}
-        <div className="flex border-b border-slate-800 gap-4 overflow-x-auto pb-1 scrollbar-none whitespace-nowrap">
+        <div className="flex border-b-2 border-[#e5e5e5] gap-3 pb-3 overflow-x-auto whitespace-nowrap">
           <button
             onClick={() => setActiveSection("CURRICULUM")}
-            className={`pb-3 text-sm font-bold flex items-center gap-2 border-b-2 transition-all ${
+            className={`py-3 px-5 rounded-2xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 ${
               activeSection === "CURRICULUM"
-                ? "border-rose-500 text-white"
-                : "border-transparent text-slate-400 hover:text-slate-200"
+                ? "bg-[#7c3aed] text-white shadow-[0_3px_0_#5b21b6]"
+                : "bg-white text-[#777777] hover:text-[#100f3e] border-2 border-[#e5e5e5]"
             }`}
           >
-            <Sliders className="w-4 h-4 text-rose-400" />
+            <Sliders className="w-4 h-4" />
             <span>Weekly Curriculum & Arena Controls</span>
           </button>
 
           <button
             onClick={() => setActiveSection("CONTESTANTS")}
-            className={`pb-3 text-sm font-bold flex items-center gap-2 border-b-2 transition-all ${
+            className={`py-3 px-5 rounded-2xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 ${
               activeSection === "CONTESTANTS"
-                ? "border-rose-500 text-white"
-                : "border-transparent text-slate-400 hover:text-slate-200"
+                ? "bg-[#7c3aed] text-white shadow-[0_3px_0_#5b21b6]"
+                : "bg-white text-[#777777] hover:text-[#100f3e] border-2 border-[#e5e5e5]"
             }`}
           >
-            <Users className="w-4 h-4 text-sky-400" />
+            <Users className="w-4 h-4" />
             <span>Contestant Roster & Device Reset ({contestants.length})</span>
           </button>
         </div>
 
         {notice && (
-          <div className="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-xs flex items-center justify-between animate-in fade-in">
+          <div className="p-4 rounded-2xl bg-[#f3e8ff] border-2 border-[#7c3aed] text-[#100f3e] text-xs font-bold flex items-center justify-between shadow-[0_2px_0_#7c3aed] animate-in fade-in">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-[#7c3aed]" />
               <span>{notice}</span>
             </div>
-            <button onClick={() => setNotice(null)} className="text-emerald-400 hover:text-white">
-              <X className="w-3.5 h-3.5" />
+            <button onClick={() => setNotice(null)} className="text-[#777777] hover:text-[#100f3e]">
+              <X className="w-4 h-4" />
             </button>
           </div>
         )}
@@ -382,10 +382,10 @@ export default function AdminPage() {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`py-2 px-4 rounded-xl text-xs font-bold transition-all ${
+                    className={`py-2 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                       activeTab === tab
-                        ? "bg-rose-600 text-white shadow-lg shadow-rose-950/50"
-                        : "bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-800"
+                        ? "bg-[#7c3aed] text-white shadow-[0_3px_0_#5b21b6]"
+                        : "bg-white text-[#777777] hover:text-[#100f3e] border-2 border-[#e5e5e5]"
                     }`}
                   >
                     {tab === "ALL" ? "All Tracks (18 Modules)" : `${tab} Track`}
@@ -395,9 +395,9 @@ export default function AdminPage() {
 
               <button
                 onClick={fetchData}
-                className="self-start sm:self-auto py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 flex items-center gap-2 transition-colors border border-slate-700"
+                className="btn-tactile-secondary py-2 px-3 text-xs self-start sm:self-auto flex items-center gap-2"
               >
-                <RefreshCw className="w-3.5 h-3.5 text-rose-400" />
+                <RefreshCw className="w-3.5 h-3.5 text-[#7c3aed]" />
                 <span>Refresh</span>
               </button>
             </div>
@@ -416,59 +416,59 @@ export default function AdminPage() {
                 return (
                   <div
                     key={week.id}
-                    className={`p-6 rounded-2xl border transition-all flex flex-col justify-between ${
+                    className={`p-6 rounded-3xl border-2 transition-all flex flex-col justify-between ${
                       week.isUnlocked
-                        ? "bg-slate-900/90 border-slate-700 shadow-lg"
-                        : "bg-slate-950/60 border-slate-800/80"
+                        ? "bg-white border-[#7c3aed] shadow-[0_4px_0_#7c3aed]"
+                        : "bg-[#fcfcfc] border-[#e5e5e5] shadow-[0_4px_0_#e5e5e5]"
                     }`}
                   >
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 border border-slate-700">
-                          <Icon className="w-3.5 h-3.5 text-rose-400" />
+                        <span className="inline-flex items-center gap-1.5 text-xs font-black px-2.5 py-1 rounded-xl bg-[#f7f7f7] text-[#100f3e] border border-[#e5e5e5]">
+                          <Icon className="w-3.5 h-3.5 text-[#7c3aed]" />
                           <span>{week.track}</span>
-                          <span className="text-slate-500">&bull;</span>
+                          <span className="text-[#777777]">&bull;</span>
                           <span>{isMock ? "Mock" : `W0${week.weekNumber}`}</span>
                         </span>
 
                         <span
-                          className={`text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
+                          className={`text-xs font-black px-2.5 py-1 rounded-full flex items-center gap-1 uppercase tracking-wider ${
                             week.isUnlocked
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
-                              : "bg-slate-800 text-slate-500 border border-slate-700/60"
+                              ? "bg-[#f3e8ff] text-[#7c3aed] border border-[#7c3aed]/30"
+                              : "bg-[#f7f7f7] text-[#777777] border border-[#e5e5e5]"
                           }`}
                         >
                           {week.isUnlocked ? (
                             <>
-                              <Unlock className="w-3 h-3" />
+                              <Unlock className="w-3 h-3 text-[#7c3aed]" />
                               <span>UNLOCKED</span>
                             </>
                           ) : (
                             <>
-                              <Lock className="w-3 h-3" />
+                              <Lock className="w-3 h-3 text-[#777777]" />
                               <span>LOCKED</span>
                             </>
                           )}
                         </span>
                       </div>
 
-                      <h3 className="text-sm font-bold text-white leading-snug">{week.title}</h3>
+                      <h3 className="text-base font-black text-[#100f3e] leading-snug">{week.title}</h3>
 
-                      <p className="text-[11px] text-slate-400">
+                      <p className="text-xs font-bold text-[#777777]">
                         {week.unlockedAt
                           ? `Unlocked at: ${new Date(week.unlockedAt).toLocaleString()}`
                           : "Currently locked to contestants"}
                       </p>
                     </div>
 
-                    <div className="pt-4 mt-4 border-t border-slate-800/80">
+                    <div className="pt-4 mt-4 border-t-2 border-[#e5e5e5]">
                       <button
                         onClick={() => handleToggle(week)}
                         disabled={isToggling}
-                        className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+                        className={`w-full py-3 px-4 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${
                           week.isUnlocked
-                            ? "bg-slate-800 hover:bg-rose-950/50 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-700/50"
-                            : "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-md shadow-emerald-950/40"
+                            ? "btn-tactile-secondary hover:border-[#ff4b4b] hover:text-[#ff4b4b]"
+                            : "btn-tactile-primary"
                         }`}
                       >
                         {isToggling ? (
@@ -503,10 +503,10 @@ export default function AdminPage() {
                   <button
                     key={track}
                     onClick={() => setContestantTrackFilter(track)}
-                    className={`py-2 px-3.5 rounded-xl text-xs font-bold transition-all ${
+                    className={`py-2 px-3.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                       contestantTrackFilter === track
-                        ? "bg-rose-600 text-white shadow-lg shadow-rose-950/50"
-                        : "bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-800"
+                        ? "bg-[#7c3aed] text-white shadow-[0_3px_0_#5b21b6]"
+                        : "bg-white text-[#777777] hover:text-[#100f3e] border-2 border-[#e5e5e5]"
                     }`}
                   >
                     {track === "ALL" ? "All Contestants" : `${track} Track`}
@@ -515,22 +515,22 @@ export default function AdminPage() {
               </div>
 
               <div className="relative min-w-[240px]">
-                <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-[#777777] absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   placeholder="Search by username..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500"
+                  className="w-full pl-9 pr-4 py-2 bg-white border-2 border-[#e5e5e5] rounded-xl text-xs font-bold text-[#100f3e] placeholder-[#777777] focus:outline-none focus:border-[#7c3aed]"
                 />
               </div>
             </div>
 
             {/* Contestants Table */}
-            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+            <div className="bg-white border-2 border-[#e5e5e5] rounded-3xl overflow-hidden shadow-[0_6px_0_#e5e5e5]">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-950/80 border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[10px]">
+                  <thead className="bg-[#f7f7f7] border-b-2 border-[#e5e5e5] text-[#777777] font-black uppercase tracking-wider text-[11px]">
                     <tr>
                       <th className="py-3.5 px-4">Contestant</th>
                       <th className="py-3.5 px-4">Track</th>
@@ -540,65 +540,65 @@ export default function AdminPage() {
                       <th className="py-3.5 px-4 text-right">Proctor Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60">
+                  <tbody className="divide-y-2 divide-[#f1f1f1] font-bold">
                     {filteredContestants.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="py-12 text-center text-slate-500 text-xs">
+                        <td colSpan={6} className="py-12 text-center text-[#777777] text-xs font-bold">
                           No registered contestants match the search criteria.
                         </td>
                       </tr>
                     ) : (
                       filteredContestants.map((c) => {
                         const trackColor = {
-                          CLOUD: "text-sky-400 bg-sky-500/10 border-sky-500/20",
-                          COMPUTING: "text-amber-400 bg-amber-500/10 border-amber-500/20",
-                          NETWORK: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+                          CLOUD: "text-[#1cb0f6] bg-[#ddf4ff] border-[#1cb0f6]/20",
+                          COMPUTING: "text-[#ff9600] bg-[#fff2d6] border-[#ff9600]/20",
+                          NETWORK: "text-[#7c3aed] bg-[#f3e8ff] border-[#7c3aed]/20",
                         }[c.track];
 
                         return (
-                          <tr key={c.id} className="hover:bg-slate-850 transition-colors">
+                          <tr key={c.id} className="hover:bg-[#fcfaff] transition-colors">
                             <td className="py-3.5 px-4">
-                              <div className="font-bold text-white text-sm">@{c.username}</div>
-                              <div className="text-[10px] text-slate-500 font-mono">
+                              <div className="font-black text-[#100f3e] text-sm">@{c.username}</div>
+                              <div className="text-[10px] text-[#777777] font-mono">
                                 ID: {c.id.slice(0, 8)}...
                               </div>
                             </td>
 
                             <td className="py-3.5 px-4">
                               <span
-                                className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${trackColor}`}
+                                className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase border ${trackColor}`}
                               >
                                 {c.track}
                               </span>
                             </td>
 
-                            <td className="py-3.5 px-4 text-slate-400">
+                            <td className="py-3.5 px-4 text-[#777777]">
                               {new Date(c.createdAt).toLocaleDateString()}
                             </td>
 
                             <td className="py-3.5 px-4">
                               {c.activeSessionsCount > 0 ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-semibold">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#f3e8ff] text-[#7c3aed] border border-[#7c3aed]/20 text-[10px] font-black">
                                   <Smartphone className="w-3 h-3" />
                                   <span>1 Active Device</span>
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center gap-1 text-slate-500 text-[10px]">
+                                <span className="inline-flex items-center gap-1 text-[#777777] text-[10px]">
                                   No Active Session
                                 </span>
                               )}
                               {c.latestDeviceUuid && (
-                                <div className="text-[10px] text-slate-600 font-mono mt-0.5 truncate max-w-[120px]">
+                                <div className="text-[10px] text-[#777777] font-mono mt-0.5 truncate max-w-[120px]">
                                   {c.latestDeviceUuid}
                                 </div>
                               )}
                             </td>
 
                             <td className="py-3.5 px-4">
-                              <div className="font-semibold text-white">
+                              <div className="font-black text-[#100f3e]">
                                 {c.completedAttemptsCount} Completed
                               </div>
-                              <div className="text-[10px] text-slate-400">
+                              <div className="text-[10px] text-[#7c3aed] font-black">
                                 Total: {c.totalScore} Pts
                               </div>
                             </td>
@@ -609,9 +609,9 @@ export default function AdminPage() {
                                   onClick={() => handleResetSession(c)}
                                   disabled={actionLoadingId === c.id}
                                   title="Clear active device binding"
-                                  className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-[11px] font-bold flex items-center gap-1 transition-colors disabled:opacity-50"
+                                  className="btn-tactile-secondary py-1.5 px-3 text-xs"
                                 >
-                                  <Smartphone className="w-3 h-3 text-purple-400" />
+                                  <Smartphone className="w-3 h-3 text-[#7c3aed]" />
                                   <span>Reset Device</span>
                                 </button>
 
@@ -622,9 +622,9 @@ export default function AdminPage() {
                                     setPinError(null);
                                   }}
                                   title="Reset contestant 6-digit PIN"
-                                  className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-[11px] font-bold flex items-center gap-1 transition-colors"
+                                  className="btn-tactile-primary py-1.5 px-3 text-xs"
                                 >
-                                  <KeyRound className="w-3 h-3 text-amber-400" />
+                                  <KeyRound className="w-3 h-3" />
                                   <span>Reset PIN</span>
                                 </button>
                               </div>
@@ -642,28 +642,28 @@ export default function AdminPage() {
 
         {/* PIN RESET MODAL */}
         {pinModalUser && (
-          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl animate-in zoom-in-95">
+          <div className="fixed inset-0 z-50 bg-[#100f3e]/40 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white border-2 border-[#e5e5e5] rounded-3xl p-6 sm:p-8 max-w-sm w-full space-y-5 shadow-[0_8px_0_#e5e5e5] animate-in zoom-in-95">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2.5 rounded-2xl bg-[#f3e8ff] text-[#7c3aed]">
                     <KeyRound className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-white text-base">Reset Contestant PIN</h3>
-                    <p className="text-xs text-slate-400">@{pinModalUser.username}</p>
+                    <h3 className="font-black text-[#100f3e] text-base">Reset Contestant PIN</h3>
+                    <p className="text-xs font-bold text-[#777777]">@{pinModalUser.username}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setPinModalUser(null)}
-                  className="p-1 rounded-lg text-slate-400 hover:text-white"
+                  className="p-1 rounded-xl text-[#777777] hover:text-[#100f3e]"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-300 block">
+                <label className="text-xs font-black uppercase tracking-wider text-[#100f3e] block">
                   New 6-Digit PIN
                 </label>
                 <input
@@ -672,10 +672,10 @@ export default function AdminPage() {
                   placeholder="e.g. 123456"
                   value={newPinInput}
                   onChange={(e) => setNewPinInput(e.target.value.replace(/\D/g, ""))}
-                  className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-center text-lg font-mono tracking-widest text-white focus:outline-none focus:border-rose-500"
+                  className="w-full px-4 py-3 bg-white border-2 border-[#e5e5e5] rounded-2xl text-center text-xl font-mono font-bold tracking-widest text-[#100f3e] focus:outline-none focus:border-[#7c3aed] focus:shadow-[0_2px_0_#7c3aed] transition-all"
                 />
-                {pinError && <p className="text-xs text-rose-400">{pinError}</p>}
-                <p className="text-[11px] text-slate-500">
+                {pinError && <p className="text-xs font-bold text-[#ff4b4b]">{pinError}</p>}
+                <p className="text-[11px] font-bold text-[#777777]">
                   Must be exactly 6 numbers. Contestant must use this PIN on next sign-in.
                 </p>
               </div>
@@ -683,14 +683,14 @@ export default function AdminPage() {
               <div className="flex items-center gap-3 pt-2">
                 <button
                   onClick={() => setPinModalUser(null)}
-                  className="flex-1 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300"
+                  className="btn-tactile-secondary flex-1 py-3 text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSavePin}
                   disabled={actionLoadingId === pinModalUser.id || newPinInput.length !== 6}
-                  className="flex-1 py-2 px-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-bold text-white disabled:opacity-50"
+                  className="btn-tactile-primary flex-1 py-3 text-xs"
                 >
                   Confirm PIN
                 </button>

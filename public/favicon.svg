@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="0" flood-color="#5b21b6" flood-opacity="1"/>
+    </filter>
+  </defs>
+  <!-- Background Tactile Rounded Badge in Purple -->
+  <rect x="6" y="8" width="52" height="48" rx="16" fill="#7c3aed" filter="url(#shadow)"/>
+  <!-- Highlight inner surface -->
+  <rect x="9" y="11" width="46" height="20" rx="13" fill="#8b5cf6" opacity="0.5"/>
+  <!-- Sigma notation symbol (Greek capital letter Sigma) -->
+  <text x="32" y="44" font-family="'Nunito', 'Segoe UI', system-ui, sans-serif" font-weight="900" font-size="34" fill="#ffffff" text-anchor="middle" dominant-baseline="auto">∑</text>
+</svg>

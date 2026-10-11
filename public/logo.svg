@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" width="240" height="60">
+  <defs>
+    <filter id="logoShadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="2.5" stdDeviation="0" flood-color="#5b21b6" flood-opacity="1"/>
+    </filter>
+  </defs>
+  <!-- Sigma Notation Emblem on the left -->
+  <g transform="translate(6, 6) scale(0.8)">
+    <rect x="4" y="6" width="48" height="46" rx="14" fill="#7c3aed" filter="url(#logoShadow)"/>
+    <rect x="7" y="9" width="42" height="18" rx="10" fill="#8b5cf6" opacity="0.45"/>
+    <text x="28" y="40" font-family="'Nunito', 'Segoe UI', system-ui, sans-serif" font-weight="900" font-size="32" fill="#ffffff" text-anchor="middle">∑</text>
+  </g>
+  <!-- Brand text -->
+  <text x="64" y="42" font-family="'Nunito', system-ui, sans-serif" font-weight="900" font-size="34" fill="#7c3aed" letter-spacing="-0.5px">euler</text>
+  <!-- Quiz app badge -->
+  <rect x="156" y="16" width="68" height="24" rx="12" fill="#ddf4ff"/>
+  <text x="190" y="32" font-family="'Nunito', system-ui, sans-serif" font-weight="800" font-size="11" fill="#1cb0f6" text-anchor="middle">QUIZ APP</text>
+</svg>

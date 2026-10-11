@@ -15,10 +15,13 @@ import {
   Info,
   Filter,
   Shuffle,
-  RotateCcw,
   BookMarked,
   Layers,
+  Check,
+  X,
 } from "lucide-react";
+import { Navbar } from "@/components/Navbar";
+import { EulerSigma } from "@/components/EulerSigma";
 
 interface Option {
   id: string;
@@ -59,7 +62,6 @@ function PracticePageContent() {
   const [bookmarked, setBookmarked] = useState<Record<string, boolean>>({});
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Fetch Practice Questions with optional filters
   const fetchPracticeQuestions = async (domain = selectedDomain, topic = selectedTopic, random = isRandomized) => {
     try {
       setLoading(true);
@@ -80,7 +82,6 @@ function PracticePageContent() {
         if (data.availableDomains) setAvailableDomains(data.availableDomains);
         if (data.availableTopics) setAvailableTopics(data.availableTopics);
 
-        // Preload bookmarks state
         const bmMap: Record<string, boolean> = {};
         data.questions.forEach((q: Question) => {
           if (q.isBookmarked) bmMap[q.id] = true;
@@ -105,14 +106,13 @@ function PracticePageContent() {
     fetchPracticeQuestions();
   }, [weekNumber]);
 
-  // Reset answer when navigating to another question
   useEffect(() => {
     setSelectedAnswers([]);
     setIsRevealed(false);
   }, [currentIndex]);
 
   const handleSelectOption = (key: string) => {
-    if (isRevealed) return; // Locked once checked
+    if (isRevealed) return;
 
     const currentQ = questions[currentIndex];
     if (!currentQ) return;
@@ -145,7 +145,6 @@ function PracticePageContent() {
       sortedSelected.length === correctKeys.length &&
       sortedSelected.every((k, idx) => k === correctKeys[idx]);
 
-    // Record answer in database (Mistake Notebook integration)
     try {
       const selectedOptionIds = currentQ.options
         .filter((o) => sortedSelected.includes(o.optionKey))
@@ -168,7 +167,6 @@ function PracticePageContent() {
 
   const toggleBookmark = async (qId: string) => {
     const nextState = !bookmarked[qId];
-    // Optimistic UI update
     setBookmarked((prev) => ({ ...prev, [qId]: nextState }));
 
     try {
@@ -179,9 +177,8 @@ function PracticePageContent() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        showToast(nextState ? "Question bookmarked! Added to Starred list." : "Question removed from bookmarks.");
+        showToast(nextState ? "Starred for revision notebook!" : "Removed from starred list.");
       } else {
-        // Revert on failure
         setBookmarked((prev) => ({ ...prev, [qId]: !nextState }));
       }
     } catch {
@@ -213,25 +210,10 @@ function PracticePageContent() {
 
   if (loading && questions.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center gap-4 text-slate-400">
-        <div className="w-8 h-8 border-3 border-sky-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm font-medium">Loading Practice Drills & Syllabus Bank...</p>
-      </div>
-    );
-  }
-
-  if (error && questions.length === 0) {
-    return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
-        <div className="max-w-md w-full p-8 rounded-3xl bg-slate-900 border border-slate-800 text-center space-y-6 shadow-2xl">
-          <p className="text-sm text-slate-400">{error || "No practice questions found."}</p>
-          <Link
-            href="/dashboard"
-            className="inline-block py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-colors"
-          >
-            Back to Dashboard
-          </Link>
-        </div>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4 text-[#777777]">
+        <EulerSigma mood="thinking" size={90} />
+        <div className="w-8 h-8 border-4 border-[#7c3aed] border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm font-bold text-[#100f3e]">Loading practice pool...</p>
       </div>
     );
   }
@@ -249,307 +231,247 @@ function PracticePageContent() {
     sortedSelected.every((k, idx) => k === sortedCorrect[idx]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between">
+    <div className="min-h-screen bg-white text-[#100f3e] flex flex-col justify-between selection:bg-transparent">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-sky-300 shadow-2xl animate-in fade-in slide-in-from-bottom-2">
+        <div className="fixed bottom-24 right-6 z-50 px-4 py-3 rounded-2xl bg-[#100f3e] text-white text-xs font-black shadow-2xl animate-in fade-in">
           {toastMessage}
         </div>
       )}
 
-      {/* Top Header & Filter Bar */}
-      <header className="border-b border-slate-800/80 bg-slate-900/80 backdrop-blur-xl sticky top-0 z-40">
-        <div className="max-w-5xl mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4">
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+      {/* Top Navigation */}
+      <Navbar />
+
+      {/* Filter / Subheader Bar */}
+      <div className="border-b-2 border-[#e5e5e5] bg-[#f7f7f7] px-4 sm:px-8 py-3">
+        <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
             <Link
               href="/dashboard"
-              className="p-1.5 sm:p-2 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-slate-400 hover:text-white transition-colors border border-slate-700/60"
+              className="p-1.5 rounded-xl border-2 border-[#e5e5e5] bg-white text-[#777777] hover:text-[#100f3e]"
             >
               <ChevronLeft className="w-4 h-4" />
             </Link>
-
-            <span className="text-xs font-bold px-2 sm:px-2.5 py-1 rounded-md bg-sky-500/20 text-sky-400 border border-sky-500/30">
-              PRACTICE &bull; W0{weekNumber}
-            </span>
-
-            <span className="text-xs text-slate-400 font-semibold hidden lg:inline-block max-w-xs truncate">
-              {currentQ ? `${currentQ.domain} • ${currentQ.topic}` : "Practice Drills"}
+            <span className="text-xs font-black uppercase tracking-wider text-[#7c3aed] bg-[#f3e8ff] px-2.5 py-1 rounded-full">
+              PRACTICE DRILL • WEEK {weekNumber}
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            {/* Randomize order toggle */}
+          <div className="flex items-center gap-2">
+            {/* Domain Filter */}
+            <select
+              value={selectedDomain}
+              onChange={(e) => handleFilterDomainChange(e.target.value)}
+              className="bg-white border-2 border-[#e5e5e5] text-[#100f3e] font-bold rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-[#7c3aed]"
+            >
+              <option value="">All Domains ({availableDomains.length})</option>
+              {availableDomains.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
+
+            {/* Shuffle */}
             <button
               onClick={handleToggleRandomize}
-              title="Shuffle question sequence"
-              className={`p-1.5 sm:p-2 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+              className={`p-2 rounded-xl border-2 text-xs font-black flex items-center gap-1.5 ${
                 isRandomized
-                  ? "bg-sky-500/20 border-sky-500/40 text-sky-400"
-                  : "bg-slate-800/60 border-slate-700/60 text-slate-400 hover:text-slate-200"
+                  ? "bg-[#f3e8ff] border-[#7c3aed] text-[#7c3aed]"
+                  : "bg-white border-[#e5e5e5] text-[#777777]"
               }`}
             >
               <Shuffle className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Shuffle</span>
             </button>
 
-            {/* Bookmark current question */}
+            {/* Bookmark */}
             {currentQ && (
               <button
                 onClick={() => toggleBookmark(currentQ.id)}
-                title={bookmarked[currentQ.id] ? "Remove bookmark" : "Bookmark question"}
-                className={`p-1.5 sm:p-2 rounded-xl border transition-colors ${
+                className={`p-2 rounded-xl border-2 transition-colors ${
                   bookmarked[currentQ.id]
-                    ? "bg-amber-500/20 border-amber-500/40 text-amber-400"
-                    : "bg-slate-800/60 border-slate-700/60 text-slate-400 hover:text-amber-400"
+                    ? "bg-[#fff2d6] border-[#ff9600] text-[#ff9600]"
+                    : "bg-white border-[#e5e5e5] text-[#777777]"
                 }`}
               >
-                <Star
-                  className={`w-4 h-4 ${bookmarked[currentQ.id] ? "fill-amber-400" : ""}`}
-                />
+                <Star className={`w-4 h-4 ${bookmarked[currentQ.id] ? "fill-[#ff9600]" : ""}`} />
               </button>
             )}
-
-            <Link
-              href="/mistakes"
-              className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60 text-xs font-semibold flex items-center gap-1.5 transition-colors"
-            >
-              <BookMarked className="w-3.5 h-3.5 text-rose-400" />
-              <span className="hidden sm:inline">Notebook</span>
-            </Link>
           </div>
         </div>
+      </div>
 
-        {/* Domain & Topic Drill Filters */}
-        <div className="border-t border-slate-800/60 bg-slate-900/40 px-3 sm:px-4 py-2">
-          <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-2 sm:gap-3 text-xs">
-            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-              <span className="text-slate-400 flex items-center gap-1 font-medium shrink-0">
-                <Filter className="w-3 h-3 text-sky-400" />
-                <span className="hidden sm:inline">Drill Filter:</span>
-              </span>
-
-              {/* Domain Filter */}
-              <select
-                value={selectedDomain}
-                onChange={(e) => handleFilterDomainChange(e.target.value)}
-                className="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-sky-500 max-w-[130px] sm:max-w-xs truncate"
-              >
-                <option value="">All Domains ({availableDomains.length})</option>
-                {availableDomains.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
-
-              {/* Topic Filter */}
-              {availableTopics.length > 0 && (
-                <select
-                  value={selectedTopic}
-                  onChange={(e) => handleFilterTopicChange(e.target.value)}
-                  className="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-sky-500 max-w-[130px] sm:max-w-xs truncate"
-                >
-                  <option value="">All Topics ({availableTopics.length})</option>
-                  {availableTopics.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
-
-            <div className="text-slate-400 text-[11px] font-medium hidden sm:block">
-              {questions.length} Question{questions.length !== 1 ? "s" : ""} Available
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto w-full px-3 sm:px-4 py-5 sm:py-8 flex-1 flex flex-col justify-between space-y-5 sm:space-y-6">
+      {/* Main Practice Question */}
+      <main className="max-w-3xl mx-auto w-full px-4 sm:px-6 py-8 flex-1 flex flex-col justify-between">
         {currentQ ? (
-          <div className="space-y-6">
-            {/* Question Header */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-xs text-slate-400">
-                <span className="font-semibold text-slate-300">
-                  Question {currentIndex + 1} of {questions.length}
-                </span>
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold text-[11px]">
-                    {currentQ.questionType.replace("_", " ")}
+          <div className="space-y-8 select-none">
+            {/* Question speech prompt */}
+            <div className="flex items-start gap-4">
+              <EulerSigma
+                mood={isRevealed ? (isUserCorrect ? "celebrating" : "encouraging") : "happy"}
+                size={70}
+                className="shrink-0"
+              />
+              <div className="flex-1 bg-white border-2 border-[#e5e5e5] rounded-3xl p-5 shadow-[0_4px_0_#e5e5e5]">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-black text-[#7c3aed] uppercase tracking-wider">
+                    Question {currentIndex + 1} of {questions.length}
                   </span>
-                  <span className="px-2 py-0.5 rounded bg-sky-950/40 border border-sky-800/40 text-sky-400 font-semibold text-[11px]">
-                    {currentQ.domain}
-                  </span>
+                  <span className="text-xs font-bold text-[#777777]">•</span>
+                  <span className="text-xs font-bold text-[#777777]">{currentQ.domain}</span>
                 </div>
+                <h2 className="text-xl sm:text-2xl font-black text-[#100f3e] leading-snug">
+                  {currentQ.questionText}
+                </h2>
               </div>
-
-              <h2 className="text-lg sm:text-xl font-bold text-white leading-relaxed">
-                {currentQ.questionText}
-              </h2>
             </div>
 
             {/* Options */}
-            <div className="space-y-3">
-              {currentQ.options.map((opt, optIndex) => {
+            <div className="space-y-3 pt-2">
+              {currentQ.options.map((opt) => {
                 const isSelected = selectedAnswers.includes(opt.optionKey);
                 const isOptionCorrect = opt.isCorrect;
-                const displayLetter = opt.optionKey;
 
-                let cardStyle =
-                  "bg-slate-900/80 border-slate-800 text-slate-300 hover:bg-slate-800/60 hover:border-slate-700";
-                let badgeStyle = "bg-slate-800 text-slate-400 border border-slate-700";
-
+                let cardClass = "quiz-option-card";
                 if (isRevealed) {
-                  if (isOptionCorrect) {
-                    cardStyle =
-                      "bg-emerald-950/40 border-emerald-500/80 text-emerald-200 shadow-md shadow-emerald-950/20";
-                    badgeStyle = "bg-emerald-500 text-white font-bold";
-                  } else if (isSelected && !isOptionCorrect) {
-                    cardStyle = "bg-rose-950/40 border-rose-500/80 text-rose-200";
-                    badgeStyle = "bg-rose-500 text-white font-bold";
-                  }
+                  if (isOptionCorrect) cardClass += " correct";
+                  else if (isSelected) cardClass += " incorrect";
                 } else if (isSelected) {
-                  cardStyle = "bg-sky-950/40 border-sky-500 text-white shadow-md shadow-sky-950/30";
-                  badgeStyle = "bg-sky-500 text-white font-bold";
+                  cardClass += " selected";
                 }
 
                 return (
-                  <button
+                  <div
                     key={opt.id}
                     onClick={() => handleSelectOption(opt.optionKey)}
-                    className={`w-full text-left p-4 rounded-2xl border transition-all duration-200 flex items-start gap-4 ${cardStyle}`}
+                    className={`${cardClass} p-4 sm:p-5 flex items-center gap-4`}
                   >
                     <div
-                      className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${badgeStyle}`}
+                      className={`w-9 h-9 rounded-xl font-black text-sm flex items-center justify-center shrink-0 border-2 ${
+                        isRevealed && isOptionCorrect
+                          ? "bg-[#7c3aed] border-[#7c3aed] text-white"
+                          : isRevealed && isSelected && !isOptionCorrect
+                          ? "bg-[#ff4b4b] border-[#ff4b4b] text-white"
+                          : isSelected
+                          ? "bg-[#7c3aed] border-[#7c3aed] text-white"
+                          : "bg-[#f7f7f7] border-[#e5e5e5] text-[#777777]"
+                      }`}
                     >
-                      {displayLetter}
+                      {opt.optionKey}
                     </div>
-                    <span className="text-sm leading-snug pt-0.5 font-medium flex-1">
+
+                    <span className="text-base sm:text-lg font-bold leading-snug flex-1">
                       {opt.optionText}
                     </span>
+
                     {isRevealed && isOptionCorrect && (
-                      <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                      <CheckCircle2 className="w-6 h-6 text-[#7c3aed] shrink-0" />
                     )}
                     {isRevealed && isSelected && !isOptionCorrect && (
-                      <XCircle className="w-5 h-5 text-rose-400 shrink-0" />
+                      <XCircle className="w-6 h-6 text-[#ff4b4b] shrink-0" />
                     )}
-                  </button>
+                  </div>
                 );
               })}
             </div>
+          </div>
+        ) : (
+          <div className="text-center py-16 text-[#777777] font-bold">
+            No practice questions matching current filter.
+          </div>
+        )}
+      </main>
 
-            {/* Action Check Button */}
+      {/* Tactile Bottom Feedback Footer */}
+      <footer
+        className={`border-t-2 transition-colors py-5 px-4 sm:px-8 sticky bottom-0 z-40 ${
+          isRevealed
+            ? isUserCorrect
+              ? "bg-[#f3e8ff] border-[#7c3aed]"
+              : "bg-[#ffdfe0] border-[#ff4b4b]"
+            : "bg-white border-[#e5e5e5]"
+        }`}
+      >
+        <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          {/* Feedback Info when checked */}
+          {isRevealed ? (
+            <div className="flex items-start gap-3 w-full sm:w-auto">
+              {isUserCorrect ? (
+                <div className="w-12 h-12 rounded-2xl bg-white text-[#7c3aed] flex items-center justify-center shrink-0 shadow-[0_2px_0_#7c3aed]">
+                  <Check className="w-7 h-7 stroke-[3]" />
+                </div>
+              ) : (
+                <div className="w-12 h-12 rounded-2xl bg-white text-[#ff4b4b] flex items-center justify-center shrink-0 shadow-[0_2px_0_#ff4b4b]">
+                  <X className="w-7 h-7 stroke-[3]" />
+                </div>
+              )}
+
+              <div>
+                <h3
+                  className={`text-lg font-black ${
+                    isUserCorrect ? "text-[#7c3aed]" : "text-[#ff4b4b]"
+                  }`}
+                >
+                  {isUserCorrect ? "Awesome!" : "Correct Solution:"}
+                </h3>
+                <p className="text-xs font-bold text-[#100f3e] max-w-lg mt-0.5">
+                  {!isUserCorrect && (
+                    <strong className="text-[#ff4b4b] mr-1">
+                      {correctKeys.join(", ")} &bull;
+                    </strong>
+                  )}
+                  {currentQ?.explanation}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
+                disabled={currentIndex === 0}
+                className="btn-tactile-secondary py-3 px-4 text-xs"
+              >
+                <ArrowLeft className="w-4 h-4 mr-1" />
+                <span>Back</span>
+              </button>
+              <span className="text-xs font-bold text-[#777777]">
+                Question {currentIndex + 1} / {questions.length}
+              </span>
+            </div>
+          )}
+
+          {/* Action button */}
+          <div className="w-full sm:w-auto flex justify-end">
             {!isRevealed ? (
               <button
                 onClick={handleCheckAnswer}
                 disabled={selectedAnswers.length === 0}
-                className="w-full py-3.5 px-4 rounded-xl font-bold text-xs bg-sky-600 hover:bg-sky-500 text-white flex items-center justify-center gap-2 transition-all disabled:opacity-40 shadow-lg shadow-sky-950/40"
+                className="btn-tactile-primary py-4 px-10 text-sm font-black w-full sm:w-auto"
               >
-                <span>Check Answer & Reveal Explanation</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>Check</span>
               </button>
             ) : (
-              /* Detailed Explanation Card */
-              <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-700/80 space-y-4 animate-in fade-in">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    {isUserCorrect ? (
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Correct Answer</span>
-                      </span>
-                    ) : (
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center gap-1">
-                        <XCircle className="w-3.5 h-3.5" />
-                        <span>Incorrect &bull; Logged to Mistake Notebook</span>
-                      </span>
-                    )}
-                  </div>
-
-                  <span className="text-xs font-bold text-slate-300">
-                    Correct Option(s): {correctKeys.join(", ")}
-                  </span>
-                </div>
-
-                <div className="text-xs text-slate-300 leading-relaxed space-y-2">
-                  <div className="font-bold text-slate-200 flex items-center gap-1.5">
-                    <Info className="w-4 h-4 text-sky-400" />
-                    <span>Huawei Official Technical Explanation:</span>
-                  </div>
-                  <p className="pl-5 text-slate-400 font-mono text-[13px] leading-relaxed">
-                    {currentQ.explanation}
-                  </p>
-                </div>
-              </div>
+              <button
+                onClick={() => {
+                  if (currentIndex < questions.length - 1) {
+                    setCurrentIndex((prev) => prev + 1);
+                  } else {
+                    router.push("/dashboard");
+                  }
+                }}
+                className={`py-4 px-10 text-sm font-black uppercase tracking-wider rounded-2xl text-white transition-all w-full sm:w-auto cursor-pointer ${
+                  isUserCorrect
+                    ? "bg-[#7c3aed] shadow-[0_4px_0_#5b21b6] hover:bg-[#8b5cf6]"
+                    : "bg-[#ff4b4b] shadow-[0_4px_0_#ea2b2b] hover:bg-[#ff5c5c]"
+                }`}
+              >
+                <span>Continue</span>
+                <ArrowRight className="w-4 h-4 ml-2 inline-block" />
+              </button>
             )}
           </div>
-        ) : (
-          <div className="text-center text-slate-400 py-16 space-y-4">
-            <Layers className="w-10 h-10 mx-auto text-slate-600" />
-            <p className="text-sm">No questions found matching your filter selection.</p>
-            <button
-              onClick={() => {
-                setSelectedDomain("");
-                setSelectedTopic("");
-                fetchPracticeQuestions("", "", isRandomized);
-              }}
-              className="px-4 py-2 rounded-xl bg-slate-800 text-slate-200 text-xs font-semibold hover:bg-slate-700 transition-colors"
-            >
-              Clear Filters
-            </button>
-          </div>
-        )}
-
-        {/* Footer Navigation & Jump Palette */}
-        <div className="pt-6 border-t border-slate-800/80 space-y-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
-              disabled={currentIndex === 0}
-              className="py-2.5 px-4 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-xs font-bold flex items-center gap-2 disabled:opacity-30 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Previous</span>
-            </button>
-
-            {/* Quick jump pagination pills (Desktop) */}
-            <div className="hidden sm:flex items-center gap-1 max-w-md overflow-x-auto py-1 px-2">
-              {questions.map((q, idx) => (
-                <button
-                  key={q.id}
-                  onClick={() => setCurrentIndex(idx)}
-                  className={`w-7 h-7 rounded-lg text-[11px] font-bold transition-all ${
-                    idx === currentIndex
-                      ? "bg-sky-600 text-white shadow-md shadow-sky-900/50 scale-110"
-                      : "bg-slate-900 text-slate-500 border border-slate-800 hover:border-slate-700"
-                  }`}
-                >
-                  {idx + 1}
-                </button>
-              ))}
-            </div>
-
-            {/* Mobile Question Indicator */}
-            <div className="sm:hidden text-xs font-bold text-slate-400">
-              Q {currentIndex + 1} / {questions.length}
-            </div>
-
-            <button
-              onClick={() =>
-                setCurrentIndex((prev) => Math.min(questions.length - 1, prev + 1))
-              }
-              disabled={currentIndex === questions.length - 1 || questions.length === 0}
-              className="py-2.5 px-4 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-xs font-bold flex items-center gap-2 disabled:opacity-30 transition-colors"
-            >
-              <span>Next</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
         </div>
-      </main>
+      </footer>
     </div>
   );
 }
@@ -558,7 +480,7 @@ export default function PracticePage() {
   return (
     <React.Suspense
       fallback={
-        <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">
+        <div className="min-h-screen bg-white flex items-center justify-center font-bold text-[#777777]">
           Loading Practice Mode...
         </div>
       }
